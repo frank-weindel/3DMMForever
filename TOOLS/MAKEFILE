@@ -102,7 +102,8 @@ TGT_NAME=Tools
 
 #-Targets-------------------------------------------------------------------
 
-ALL_SOCTOOLS = $(TARGET_DIR)tdfmake.exe $(TARGET_DIR)sitobren.exe $(TARGET_DIR)mktmap.exe
+#ALL_SOCTOOLS = $(TARGET_DIR)tdfmake.exe $(TARGET_DIR)sitobren.exe $(TARGET_DIR)mktmap.exe
+ALL_SOCTOOLS = $(TARGET_DIR)tdfmake.exe $(TARGET_DIR)mktmap.exe
 ALL_TARGETS_ROOT = $(ALL_TARGETS_ROOT) $(ALL_SOCTOOLS)
 
 CLEAN_SOCTOOLS = CLEAN_TDFMAKE CLEAN_SITOBREN CLEAN_MKTMAP
@@ -134,14 +135,14 @@ rm -f )
     del deltdf.bat
 
 
-CLEAN_SITOBREN:
-    @echo <<delsito.bat
-@echo off
-rm -f $(SITOBREN_TARGETS: =^
-rm -f )
-<<KEEP
-    cmd /c delsito.bat
-    del delsito.bat
+#CLEAN_SITOBREN:
+#    @echo <<delsito.bat
+#@echo off
+#rm -f $(SITOBREN_TARGETS: =^
+#rm -f )
+#<<KEEP
+#    cmd /c delsito.bat
+#    del delsito.bat
 
 
 CLEAN_MKTMAP:
@@ -157,10 +158,10 @@ rm -f )
 !IF "$(LOCAL_BUILD)" != "1"
 
 tdfmake.exe : $(TARGET_DIR)tdfmake.exe
-sitobren.exe : $(TARGET_DIR)sitobren.exe
+#sitobren.exe : $(TARGET_DIR)sitobren.exe
 mktmap.exe : $(TARGET_DIR)mktmap.exe
 $(TARGET_DIR)tdfmake.exe: $(SOC_OBJ_DIR)
-$(TARGET_DIR)sitobren.exe: $(SOC_OBJ_DIR)
+#$(TARGET_DIR)sitobren.exe: $(SOC_OBJ_DIR)
 $(TARGET_DIR)mktmap.exe: $(SOC_OBJ_DIR)
 
 !ENDIF # !LOCAL_BUILD
@@ -183,20 +184,20 @@ $(TARGET_DIR)tdfmake.exe : $(TDFMAKE_TARGETS) $(TARGET_DIR)tdfmake.lnk
 
 
 
-$(TARGET_DIR)sitobren.lnk : $(TOOLS_SRC_DIR)\makefile $(KAUAI_ROOT)\makefile.def
-    @echo <<$(TARGET_DIR)sitobren.lnk
-$(KAUAI_OBJ_GROUPS_FOR_SITOBREN: =^
-)
-<<KEEP
-
-$(TARGET_DIR)sitobren.exe : $(KAUAI_OBJ_GROUPS_FOR_SITOBREN)
-$(TARGET_DIR)sitobren.exe : $(SITOBREN_TARGETS) $(SITOBREN_DEPS) $(TARGET_DIR)sitobren.lnk
-    @echo Linking Sitobren Objects...
-    $(LINK) -link $(LFLAGS_CONS) \
-    $(SITOBREN_TARGETS) \
-    $(SITOBREN_DEPS) \
-    -out:$(TARGET_DIR)sitobren.exe @$(TARGET_DIR)sitobren.lnk
-    $(CHKERR)
+#$(TARGET_DIR)sitobren.lnk : $(TOOLS_SRC_DIR)\makefile $(KAUAI_ROOT)\makefile.def
+#    @echo <<$(TARGET_DIR)sitobren.lnk
+#$(KAUAI_OBJ_GROUPS_FOR_SITOBREN: =^
+#)
+#<<KEEP
+#
+#$(TARGET_DIR)sitobren.exe : $(KAUAI_OBJ_GROUPS_FOR_SITOBREN)
+#$(TARGET_DIR)sitobren.exe : $(SITOBREN_TARGETS) $(SITOBREN_DEPS) $(TARGET_DIR)sitobren.lnk
+#    @echo Linking Sitobren Objects...
+#    $(LINK) -link $(LFLAGS_CONS) \
+#    $(SITOBREN_TARGETS) \
+#    $(SITOBREN_DEPS) \
+#    -out:$(TARGET_DIR)sitobren.exe @$(TARGET_DIR)sitobren.lnk
+#    $(CHKERR)
 
 
 $(TARGET_DIR)mktmap.lnk : $(TOOLS_SRC_DIR)\makefile $(KAUAI_ROOT)\makefile.def
