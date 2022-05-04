@@ -21,10 +21,10 @@ TARGET_DIR = $(SOC_OBJ_DIR)^\
 CHT_BUILD_INC = -I$(SOC_OBJ_DIR)
 !ENDIF # !LOCAL_BUILD
 
-BREN_LIB =  $(SOC_ROOT)\elib\$(BLD_TYPE_DIR)\bren.lib\
-	    $(SOC_ROOT)\elib\$(BLD_TYPE_DIR)\brfmmxr.lib\
-	    $(SOC_ROOT)\elib\$(BLD_TYPE_DIR)\brfwmxr.lib\
-	    $(SOC_ROOT)\elib\$(BLD_TYPE_DIR)\brzbmxr.lib
+#BREN_LIB =  $(SOC_ROOT)\elib\$(BLD_TYPE_DIR)\bren.lib\
+#	    $(SOC_ROOT)\elib\$(BLD_TYPE_DIR)\brfmmxr.lib\
+#	    $(SOC_ROOT)\elib\$(BLD_TYPE_DIR)\brfwmxr.lib\
+#	    $(SOC_ROOT)\elib\$(BLD_TYPE_DIR)\brzbmxr.lib
 
 
 
@@ -46,8 +46,6 @@ UTEST_TARGETS =\
     $(TARGET_DIR)utest.res
 
 UTEST_DEPS =\
-    $(WNET_LIB) \
-    $(VFW32_LIB) \
     $(AUDIO_LIB) \
     $(BREN_LIB) \
     $(TARGET_DIR)engine.lib
@@ -230,6 +228,8 @@ $(TARGET_DIR)3dmovie.exe : $(UTEST_DEPS) $(UTEST_TARGETS) $(TARGET_DIR)utest.lnk
     @echo Linking Utest Objects...
     $(LINK) -link $(LFLAGS_GUI) \
 	$(UTEST_DEPS) \
+    $(WNET_LIB) \
+    $(VFW32_LIB) \
 	$(UTEST_TARGETS) \
 	-out:$(TARGET_DIR)3dmovie.exe @$(TARGET_DIR)utest.lnk
     $(CHKERR)

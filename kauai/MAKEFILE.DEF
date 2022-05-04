@@ -158,20 +158,20 @@ BLD_TYPE_DIR = macs
 
 
 #AUDIO LIB
-!IF "$(ARCH)" == "WIN"
-!IF "$(TYPE)" == "DEBUG"
-AUDIO_LIB = $(KAUAI_ROOT)\elib\$(BLD_TYPE_DIR)\audiod.lib
-!ELSE IF "$(TYPE)" == "SHIP"
-AUDIO_LIB = $(KAUAI_ROOT)\elib\$(BLD_TYPE_DIR)\audios.lib
-!ENDIF
-!ENDIF
+#!IF "$(ARCH)" == "WIN"
+#!IF "$(TYPE)" == "DEBUG"
+#AUDIO_LIB = $(KAUAI_ROOT)\elib\$(BLD_TYPE_DIR)\audiod.lib
+#!ELSE IF "$(TYPE)" == "SHIP"
+#AUDIO_LIB = $(KAUAI_ROOT)\elib\$(BLD_TYPE_DIR)\audios.lib
+#!ENDIF
+#!ENDIF
 
 
 #VIDEO FOR WINDOWS LIB
-VFW32_LIB = $(MSVCNT_ROOT)\lib\vfw32.lib
+VFW32_LIB = vfw32.lib
 
 #Windows WNet LIB
-WNET_LIB = $(MSVCNT_ROOT)\lib\mpr.lib
+WNET_LIB = mpr.lib
 
 #KAUAI OBJ DIRECTORIES
 KAUAI_OBJ_ROOT_DIR = $(KAUAI_ROOT)\obj
