@@ -156,7 +156,7 @@ BLD_TYPE_DIR = macs
 !ENDIF
 
 
-
+# FIXME(clemenswasser): Use the actual AudioMan libs here:
 #AUDIO LIB
 #!IF "$(ARCH)" == "WIN"
 #!IF "$(TYPE)" == "DEBUG"
@@ -165,6 +165,7 @@ BLD_TYPE_DIR = macs
 #AUDIO_LIB = $(KAUAI_ROOT)\elib\$(BLD_TYPE_DIR)\audios.lib
 #!ENDIF
 #!ENDIF
+AUDIO_LIB = $(SOC_ROOT)\stub.lib
 
 
 #VIDEO FOR WINDOWS LIB

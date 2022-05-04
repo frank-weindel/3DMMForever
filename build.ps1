@@ -9,4 +9,4 @@ if(!$env:BUILD_ENV) {
   $env:TYPE='DBSHIP';
   $env:BUILD_ENV=$true;
 }
-nmake
+cl /nologo /c "$env:SOC_ROOT\stub.cpp" "/Fo$env:SOC_ROOT\stub.obj" && lib /nologo "$env:SOC_ROOT\stub.obj" "/OUT:$env:SOC_ROOT\stub.lib" && nmake /nologo

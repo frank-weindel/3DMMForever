@@ -20,10 +20,12 @@ TARGET_DIR =
 TARGET_DIR = $(SOC_OBJ_DIR)^\
 !ENDIF # !LOCAL_BUILD
 
-#BREN_LIB =  $(SOC_ROOT)\elib\$(BLD_TYPE_DIR)\bren.lib\
-#            $(SOC_ROOT)\elib\$(BLD_TYPE_DIR)\brfmmxr.lib\
-#            $(SOC_ROOT)\elib\$(BLD_TYPE_DIR)\brfwmxr.lib\
-#            $(SOC_ROOT)\elib\$(BLD_TYPE_DIR)\brzbmxr.lib
+# FIXME(clemenswasser): Use the actual brender libs here:
+BREN_LIB = $(SOC_ROOT)\elib\$(BLD_TYPE_DIR)\bren.lib\
+           $(SOC_ROOT)\stub.lib
+#           $(SOC_ROOT)\elib\$(BLD_TYPE_DIR)\brfmmxr.lib
+#           $(SOC_ROOT)\elib\$(BLD_TYPE_DIR)\brfwmxr.lib
+#           $(SOC_ROOT)\elib\$(BLD_TYPE_DIR)\brzbmxr.lib
 
 
 ENGINE_TARGETS =\
