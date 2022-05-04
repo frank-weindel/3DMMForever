@@ -9,4 +9,9 @@ if(!$env:BUILD_ENV) {
   $env:TYPE='DBSHIP';
   $env:BUILD_ENV=$true;
 }
-cl /nologo /c "$env:SOC_ROOT\stub.cpp" "/Fo$env:SOC_ROOT\stub.obj" && lib /nologo "$env:SOC_ROOT\stub.obj" "/OUT:$env:SOC_ROOT\stub.lib" && nmake /nologo
+cl /nologo /c "$env:SOC_ROOT\stub.cpp" "/Fo$env:SOC_ROOT\stub.obj" `
+&& lib /nologo "$env:SOC_ROOT\stub.obj" "/OUT:$env:SOC_ROOT\stub.lib" `
+&& Push-Location .\kauai `
+&& nmake /nologo `
+&& Pop-Location `
+&& nmake /nologo
