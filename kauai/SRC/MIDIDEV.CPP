@@ -115,7 +115,7 @@ void MIDO::_GetSysVol(void)
 {
 	Assert(hNil != _hmo, "calling _VlmGetSys with nil _hmo");
 
-	if (0 != midiOutGetVolume((uint)_hmo, &_luVolSys))
+	if (0 != midiOutGetVolume((HMIDIOUT)_hmo, &_luVolSys))
 		{
 		// failed - assume full volume
 		_luVolSys = (ulong)(-1);
@@ -129,7 +129,7 @@ void MIDO::_GetSysVol(void)
 void MIDO::_SetSysVol(ulong luVol)
 {
 	Assert(hNil != _hmo, "calling _SetSysVol with nil _hmo");
-	midiOutSetVolume((uint)_hmo, luVol);
+	midiOutSetVolume((HMIDIOUT)_hmo, luVol);
 }
 
 

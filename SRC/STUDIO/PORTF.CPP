@@ -141,7 +141,7 @@ bool FPortGetFniOpen(FNI *pfni, LPTSTR lpstrFilter, LPTSTR lpstrTitle,
 	ofn.lpstrFile = szFile;
 	ofn.nMaxFile = kcchMaxSz;
 	ofn.lpstrFileTitle = NULL;
-	ofn.lpfnHook = OpenHookProc; 			
+	ofn.lpfnHook = (LPOFNHOOKPROC)OpenHookProc; 			
 	ofn.lpTemplateName = MAKEINTRESOURCE(dlidPortfolio);
 	ofn.Flags = OFN_FILEMUSTEXIST | OFN_HIDEREADONLY |
 				OFN_EXPLORER | OFN_ENABLEHOOK | OFN_ENABLETEMPLATE;
@@ -265,7 +265,7 @@ bool FPortGetFniSave(FNI *pfni, LPTSTR lpstrFilter, LPTSTR lpstrTitle, LPTSTR lp
 	ofn.nMaxFile = kcchMaxSz;
 	ofn.lpstrFileTitle = szFileTitle;
 	ofn.nMaxFileTitle = kcchMaxSz;
-	ofn.lpfnHook = OpenHookProc; 			
+	ofn.lpfnHook = (LPOFNHOOKPROC)OpenHookProc; 			
 	ofn.lpTemplateName = MAKEINTRESOURCE(dlidPortfolio);
 
 	// Don't use OFN_OVERWRITEPROMPT here, otherwise we can't intercept

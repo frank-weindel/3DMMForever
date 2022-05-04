@@ -70,7 +70,7 @@ bool SREC::_FInit(long csampSec, long cchan, long cbSample, ulong dtsMax)
 	if(!FAllocPv((void **)&_priff, sizeof(RIFF) + _wavehdr.dwBufferLength, fmemClear, mprNormal))
 		return fFalse;
 	
-	_wavehdr.lpData = (LPBYTE)PvAddBv(_priff, sizeof(RIFF));
+	_wavehdr.lpData = (LPSTR)PvAddBv(_priff, sizeof(RIFF));
 
 	// init RIFF structure
 	_priff->Set(_cchan, _csampSec, _cbSample, 0);
@@ -127,7 +127,7 @@ bool SREC::_FOpenRecord(void)
 	if (pvNil == _hwavein)
 		{
 		// open a wavein device
-		if (waveInOpen(&_hwavein, WAVE_MAPPER, (WAVEFORMAT *)_priff->PwfxGet(), (DWORD)_WaveInProc, (DWORD)this, CALLBACK_FUNCTION))
+		if (waveInOpen(&_hwavein, WAVE_MAPPER, (LPCWAVEFORMATEX)_priff->PwfxGet(), (DWORD)_WaveInProc, (DWORD)this, CALLBACK_FUNCTION))
 			{
 			// it doesn't support this format
 			return fFalse;

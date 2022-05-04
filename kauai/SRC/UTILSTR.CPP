@@ -1234,7 +1234,7 @@ void UpperRgchw(wchar *prgchw, long cchw)
 	AssertPvCb(prgchw, cchw * size(wchar));
 
 #ifdef WIN
-	CharUpperBuffW(prgchw, cchw);
+	CharUpperBuffW((LPWSTR)prgchw, cchw);
 #else //!WIN
 	RawRtn(); //REVIEW shonk: Mac: implement UpperRgchw
 #endif //!WIN
@@ -1253,7 +1253,7 @@ void LowerRgchw(wchar *prgchw, long cchw)
 	AssertPvCb(prgchw, cchw * size(wchar));
 
 #ifdef WIN
-	CharLowerBuffW(prgchw, cchw);
+	CharLowerBuffW((LPWSTR)prgchw, cchw);
 #else //!WIN
 	RawRtn(); //REVIEW shonk: Mac: implement UpperRgchw
 #endif //!WIN
