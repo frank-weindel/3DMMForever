@@ -12,6 +12,17 @@ if(!$env:BUILD_ENV) {
 cl /nologo /c "$env:SOC_ROOT\stub.cpp" "/Fo$env:SOC_ROOT\stub.obj" `
 && lib /nologo "$env:SOC_ROOT\stub.obj" "/OUT:$env:SOC_ROOT\stub.lib" `
 && Push-Location .\kauai `
-&& nmake /nologo `
-&& Pop-Location `
-&& nmake /nologo
+&& nmake /nologo;
+
+Pop-Location;
+
+if($LASTEXITCODE) {
+  Write-Error 'Build failed (kauai)'
+  return;
+}
+
+nmake /nologo;
+if($LASTEXITCODE) {
+  Write-Error 'Build failed'
+  return;
+}

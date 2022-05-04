@@ -76,7 +76,7 @@ ASMFLAGS = $(ASMFLAGS) -s
 CPPFLAGS = /GF /Ge $(CPPFLAGS)
 !ELSE
 #CPPFLAGS = /Ogityb1 /Gs /GF $(CPPFLAGS) REVIEW shonk: revert to this
-CPPFLAGS = /Ogityb1 /Gs /GF $(CPPFLAGS)
+CPPFLAGS = /Od /Gs /GF $(CPPFLAGS)
 !ENDIF
 
 
