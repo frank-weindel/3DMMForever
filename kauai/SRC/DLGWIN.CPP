@@ -392,7 +392,7 @@ long DLG::IditDo(long iditFocus)
 	dlgi.pdlg = this;
 	dlgi.iditFocus = iditFocus;
 	idit = DialogBoxParam(vwig.hinst, MIR(_rid), vwig.hwndApp,
-		(DLGPROC)&_FDlgCore, (long)&dlgi);
+		(DLGPROC)&_FDlgCore, (LPARAM)&dlgi);
 
 	return idit;
 }
