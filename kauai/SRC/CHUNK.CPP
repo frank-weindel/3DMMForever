@@ -104,10 +104,10 @@ const short kcvnBack = 4;
 // _FReadIndex can be removed!
 const short kcvnMin = 1;
 
-const kcvnMinStnNames = 3;
-const kcvnMinGrfcrp = 4;
-const kcvnMinSmallIndex = 4;
-const kcvnMinForest = 5;
+const int kcvnMinStnNames = 3;
+const int kcvnMinGrfcrp = 4;
+const int kcvnMinSmallIndex = 4;
+const int kcvnMinForest = 5;
 
 
 const long klwMagicChunky = BigLittle('CHN2', '2NHC'); //chunky file signature
@@ -154,7 +154,7 @@ enum
 
 // Chunk Representation (big version) - fixed element in pggcrp
 // variable part of group element is an rgkid and stn data (the name)
-const kcbMaxCrpbg = klwMax;
+const int kcbMaxCrpbg = klwMax;
 struct CRPBG
 	{
 	CKI cki;		// chunk id
@@ -202,7 +202,7 @@ const BOM kbomCrpbgBytes = 0xFFFE0000L;
 
 // Chunk Representation (small version) - fixed element in pggcrp
 // variable part of group element is an rgkid and stn data (the name)
-const kcbMaxCrpsm = 0x00FFFFFF;
+const int kcbMaxCrpsm = 0x00FFFFFF;
 const long kcbitGrfcrp = 8;
 const ulong kgrfcrpAll = (1 << kcbitGrfcrp) - 1;
 struct CRPSM

@@ -1545,7 +1545,7 @@ void GPT::_SetTextProps(DSF *pdsf)
 		TA_CENTER, // tahCenter
 		TA_RIGHT   // tahRight
 		};
-	static _mptavw[] =
+	static int _mptavw[] =
 		{
 		TA_TOP,      // tavTop
 		TA_TOP,      // tavCenter + code
