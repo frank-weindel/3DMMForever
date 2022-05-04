@@ -52,7 +52,7 @@ DEFS = $(DEFS) /D"UNICODE"
 
 #CPPFLAGS = /c /YX /Fp"frame.pch" /W3 /Gz
 #PLACED PRECOMPILED HEADERS IN PROJ MAKEFILES
-CPPFLAGS = /c /YX /W3 /Gz /Gy
+CPPFLAGS = /c /W3 /Gz /Gy
 
 ASMFLAGS = -c
 !IF "$(BROWSE)" != ""
@@ -73,10 +73,10 @@ DEFS = $(DEFS) /D"DEBUG"
 CPPFLAGS = /Q68m $(CPPFLAGS)
 ASMFLAGS = $(ASMFLAGS) -s
 !ENDIF
-CPPFLAGS = /Gf /Ge $(CPPFLAGS)
+CPPFLAGS = /GF /Ge $(CPPFLAGS)
 !ELSE
-#CPPFLAGS = /Ogityb1 /Gs /Gf $(CPPFLAGS) REVIEW shonk: revert to this
-CPPFLAGS = /Ogityb1 /Gs /Gf $(CPPFLAGS)
+#CPPFLAGS = /Ogityb1 /Gs /GF $(CPPFLAGS) REVIEW shonk: revert to this
+CPPFLAGS = /Ogityb1 /Gs /GF $(CPPFLAGS)
 !ENDIF
 
 
