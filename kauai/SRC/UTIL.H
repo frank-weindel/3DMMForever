@@ -46,6 +46,7 @@
 
 //windef.h typedef's PSZ to char *, this fools it into using PSZS instead
 #define PSZ PSZS
+#define _LPCVOID_DEFINED // So that winscard.h doesn't define it with const
 #include <windows.h>
 #include <windowsx.h>
 #include <vfw.h>
