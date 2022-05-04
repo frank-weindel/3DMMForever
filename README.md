@@ -7,7 +7,7 @@ under the [MIT license](LICENSE) as open source.
 
 ## Building instructions
 
-I managed to make it buildable (not linkable though, since the BRender and AudioMan libraries are missing) on my machine with VS 2022 and Windows 11.
+I managed to make it buildable on my machine with VS 2022 and Windows 11.
 Just launch a "Native Tools Command Prompt for VS" and first build kauai with:
 ```powershell
 cd kauai && ..\build.ps1
@@ -16,6 +16,7 @@ the proceed with building the movie Movie Maker in the root directory:
 ```powershell
 cd .. && .\build.ps1
 ```
+To get it properly working, we need the proper BRender, Audioman and SoftImage libraries, that are currently missing.
 
 ## Contributing
 
