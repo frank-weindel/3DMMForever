@@ -18,7 +18,7 @@
 #include <stddef.h>
 
 // define the endian-ness
-#ifdef IN_80386
+#if defined(IN_80386) || REG_DWORD == REG_DWORD_LITTLE_ENDIAN
 #define LITTLE_ENDIAN
 #endif //IN_80386
 
