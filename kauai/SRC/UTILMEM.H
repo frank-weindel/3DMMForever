@@ -255,7 +255,7 @@ inline void *PvAddBv(void *pv, long bv)
 	{ return (byte *)pv + bv; }
 inline void *PvSubBv(void *pv, long bv)
 	{ return (byte *)pv - bv; }
-inline long BvSubPvs(void *pv1, void *pv2)
+inline ptrdiff_t BvSubPvs(void *pv1, void *pv2)
 	{ return (byte *)pv1 - (byte *)pv2; }
 
 

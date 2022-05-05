@@ -586,7 +586,7 @@ bool STN::FFormat(PSTN pstnFormat, ...)
 	AssertPo(pstnFormat, 0);
 
 	return FFormatRgch(pstnFormat->Prgch(), pstnFormat->Cch(),
-		(ulong *)(&pstnFormat + 1));
+		(size_t *)(&pstnFormat + 1));
 }
 
 
@@ -598,14 +598,14 @@ bool STN::FFormatSz(PSZ pszFormat, ...)
 	AssertThis(0);
 	AssertSz(pszFormat);
 
-	return FFormatRgch(pszFormat, CchSz(pszFormat), (ulong *)(&pszFormat + 1));
+	return FFormatRgch(pszFormat, CchSz(pszFormat), (size_t *)(&pszFormat + 1));
 }
 
 
 /***************************************************************************
 	Core routine for sprintf functionality.
 ***************************************************************************/
-bool STN::FFormatRgch(achar *prgchFormat, long cchFormat, ulong *prgluData)
+bool STN::FFormatRgch(achar *prgchFormat, long cchFormat, size_t *prgluData)
 {
 	AssertThis(0);
 	AssertIn(cchFormat, 0, kcchMaxStn + 1);
@@ -624,7 +624,8 @@ bool STN::FFormatRgch(achar *prgchFormat, long cchFormat, ulong *prgluData)
 	long cch;
 	long cchMin;
 	long ivArg;
-	ulong lu, luRad;
+	size_t lu;
+	ulong luRad;
 	achar ch;
 	achar rgchT[kcchMaxStn];
 	achar *prgchTerm;
