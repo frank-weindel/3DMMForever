@@ -8,7 +8,7 @@ under the [MIT license](LICENSE) as open source.
 ## Building instructions
 
 I managed to make it buildable on my machine with VS 2022 and Windows 11.
-Just launch a "Native Tools Command Prompt for VS" and build:
+Just launch a "Native Tools Command Prompt for VS" (preferably x86, as porting to 64-bit is WIP and might not work) and build:
 ```powershell
 .\build.ps1
 ```
