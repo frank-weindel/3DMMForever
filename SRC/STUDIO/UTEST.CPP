@@ -19,6 +19,8 @@
 #include "studio.h"
 #include "socres.h"
 #include "mminstal.h"
+#include "stdio.h"
+#include "createconsole.h"
 
 ASSERTNAME
 
@@ -180,11 +182,14 @@ bool APP::_FInit(ulong grfapp, ulong grfgob, long ginDef)
 	FNI fniUserDoc;
 	long fFirstTimeUser;
 
+	CreateConsole();
+
 	// Only allow one copy of 3DMM to run at a time:
 	if (_FAppAlreadyRunning())
 		{
 		_TryToActivateWindow();
 		_fDontReportInitFailure = fTrue;
+		printf("_FAppAlreadyRunning");
 		goto LFail;
 		}
 #ifdef DEBUG
@@ -390,7 +395,8 @@ bool APP::_FInit(ulong grfapp, ulong grfgob, long ginDef)
 
 	return fTrue;
 LFail:
-	_fQuit = fTrue;
+    // TEMP: Commented line out below to keep 3DMM open after crashing for console window access
+	//_fQuit = fTrue; 
 
 	if (_fSwitchedResolution)
 		{
@@ -413,7 +419,7 @@ LFail:
 			pdlg->IditDo();
 		ReleasePpo(&pdlg);
 		}
-	return fFalse;
+	return fTrue; // TEMP: Keep 3DMM open after crashing for console window access
 }
 
 
@@ -1081,6 +1087,9 @@ bool APP::_FOpenResourceFile(void)
 			return fFalse;
 			}
 		}
+	
+	fni.GetStnPath(&stn);
+	printf("path to resource file: %s\n", stn.Prgch());
 	_pcfl = CFL::PcflOpen(&fni, fcflNil);
 	if (pvNil == _pcfl)
 		return fFalse;

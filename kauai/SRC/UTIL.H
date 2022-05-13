@@ -16,6 +16,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 #include <stddef.h>
+#include "stdio.h"
 
 // define the endian-ness
 #if defined(IN_80386) || REG_DWORD == REG_DWORD_LITTLE_ENDIAN

@@ -1,9 +1,9 @@
 /* Copyright (c) Microsoft Corporation.
    Licensed under the MIT License. */
 
-#define  NO_HELP_NAMES
-#define HELP_SINGLE_CHUNK
-#define NO_HELP_SYMBOLS
+//#define  NO_HELP_NAMES
+//#define HELP_SINGLE_CHUNK
+//#define NO_HELP_SYMBOLS
 //#define PACK_HELP
 
 #include "kidgs.chh"
