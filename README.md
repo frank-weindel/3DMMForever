@@ -7,12 +7,14 @@ under the [MIT license](LICENSE) as open source.
 
 ## Building instructions
 
-I managed to make it buildable on my machine with VS 2022 and Windows 11.
+Updated to compile with with VS 2022 on Windows 10/11 (thanks to [Clemens Wasser](https://github.com/clemenswasser/Microsoft-3D-Movie-Maker))
+
+If you have Windows 10, you may need to install [PowerShell 7](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.2).
+
 Just launch a "Native Tools Command Prompt for VS" (preferably x86, as porting to 64-bit is WIP and might not work) and build:
 ```powershell
-.\build.ps1
+pwsh .\build.ps1
 ```
-To get it properly working, we need the proper BRender, Audioman and SoftImage libraries, that are currently missing.
 
 ## Contributing
 

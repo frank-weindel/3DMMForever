@@ -98,9 +98,9 @@ LFLAGS_LIB = $(LFLAGS_BASE)
 
 
 !IF "$(ARCH)" == "WIN"
-LFLAGS_CONS = $(LFLAGS_CONS) /SUBSYSTEM:console kernel32.lib comdlg32.lib\
+LFLAGS_CONS = $(LFLAGS_CONS) /SUBSYSTEM:console legacy_stdio_definitions.lib kernel32.lib comdlg32.lib\
     user32.lib gdi32.lib winmm.lib
-LFLAGS_GUI = $(LFLAGS_GUI) $(LFLAGS_PROF) /SUBSYSTEM:windows,4.0 kernel32.lib\
+LFLAGS_GUI = $(LFLAGS_GUI) $(LFLAGS_PROF) /SUBSYSTEM:windows,4.0 legacy_stdio_definitions.lib kernel32.lib\
     comdlg32.lib user32.lib gdi32.lib winmm.lib advapi32.lib uuid.lib
 !ENDIF
 !IF "$(ARCH)" == "MAC"
@@ -160,12 +160,12 @@ BLD_TYPE_DIR = macs
 #AUDIO LIB
 #!IF "$(ARCH)" == "WIN"
 #!IF "$(TYPE)" == "DEBUG"
-#AUDIO_LIB = $(KAUAI_ROOT)\elib\$(BLD_TYPE_DIR)\audiod.lib
+AUDIO_LIB = $(KAUAI_ROOT)\elib\$(BLD_TYPE_DIR)\audiod.lib
 #!ELSE IF "$(TYPE)" == "SHIP"
-#AUDIO_LIB = $(KAUAI_ROOT)\elib\$(BLD_TYPE_DIR)\audios.lib
+AUDIO_LIB = $(KAUAI_ROOT)\elib\$(BLD_TYPE_DIR)\audios.lib
 #!ENDIF
 #!ENDIF
-AUDIO_LIB = $(SOC_ROOT)\stub.lib
+#AUDIO_LIB = $(SOC_ROOT)\stub.lib
 
 
 #VIDEO FOR WINDOWS LIB
@@ -218,6 +218,7 @@ BASE_OBJS =\
     $(KAUAI_OBJ_DIR)\utilmem.obj\
     $(KAUAI_OBJ_DIR)\utilrnd.obj\
     $(KAUAI_OBJ_DIR)\utilstr.obj\
+    $(KAUAI_OBJ_DIR)\stub.obj\
     $(BASE_PLATFORM_SPECIFIC)\
     $(BASE_CHIP_SPECIFIC)
 
