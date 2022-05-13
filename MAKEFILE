@@ -4,14 +4,15 @@
 
 .SILENT:
 
-ALL: ALL_BREN ALL_SRC ALL_TOOLS
+# Removed ALL_BREN from here as we're already providing Brender via bren.lib
+# Do we actually need to do this? -Frank
+ALL: ALL_SRC ALL_TOOLS
 
-
-ALL_BREN:
-    cd $(SOC_ROOT)\bren
-    @echo Making Bren All...
-    $(MAKE) /NOLOGO all
-    cd $(SOC_ROOT)
+# ALL_BREN:
+#    cd $(SOC_ROOT)\bren
+#    @echo Making Bren All...
+#    $(MAKE) /NOLOGO all
+#    cd $(SOC_ROOT)
 
 
 ALL_SRC:
