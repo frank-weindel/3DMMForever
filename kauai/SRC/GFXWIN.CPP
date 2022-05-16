@@ -1914,7 +1914,7 @@ bool NTL::FInit(void)
 		"Can't get system font");
 	AssertDo(GetObject(hfnt, size(lgf), &lgf) != 0, "Can't get logical font");
 	if (!_pgst->FAddRgch(lgf.lfFaceName, CchSz(lgf.lfFaceName), &lgf) ||
-			!EnumFonts(vwig.hdcApp, pvNil, (FONTENUMPROCA)_FEnumFont, (LPARAM)_pgst))
+			!EnumFonts(vwig.hdcApp, pvNil, _FEnumFont, (LPARAM)_pgst))
 		{
 LFail:
 		PushErc(ercGfxNoFontList);

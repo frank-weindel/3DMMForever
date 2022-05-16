@@ -8,9 +8,12 @@ set (CMAKE_CXX_STANDARD 98)
 if (MSVC)
     # Use __stdcall as default calling convention
     add_compile_options(/Gz)
+    add_link_options(/MANIFESTUAC:NO)
+    string (REGEX REPLACE "/RTC(su|[1su])" "" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
+    string (REGEX REPLACE "/RTC(su|[1su])" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 endif ()
 
-# TODO(bjrkk): These should be determined in some header file instead
+# TODO(bjrkk): The OS defines should be determined in some header file instead
 if (WIN32)
     add_compile_definitions(WIN)
 elseif (APPLE)

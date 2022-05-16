@@ -21,7 +21,6 @@
 #include "mminstal.h"
 #include "stdio.h"
 #include "createconsole.h"
-#include <winnt.h>
 
 ASSERTNAME
 
@@ -1311,34 +1310,17 @@ bool APP::FGetSetRegKey(PSZ pszValueName, void *pvData, long cbData,
 	DWORD dwDisposition;
 	DWORD dwCbData = cbData;
 	DWORD dwType;
+	HKEY hkey = 0;
 
-	HKEY hkey;
-	HKEY hkresult = 0;
-
-	if (grfreg & fregMachine)
+	if (RegCreateKeyEx((grfreg & fregMachine) ? HKEY_LOCAL_MACHINE :
+			HKEY_CURRENT_USER, kszSocratesKey, 0, NULL, REG_OPTION_NON_VOLATILE,
+			KEY_ALL_ACCESS, NULL, &hkey, &dwDisposition) != ERROR_SUCCESS)
 		{
-			hkey = HKEY_LOCAL_MACHINE;
-		}
-		else
-		{
-			hkey = HKEY_CURRENT_USER;
-		}
-
-	LSTATUS result; 
-	result = RegCreateKeyEx(hkey, kszSocratesKey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_READ | KEY_QUERY_VALUE, NULL, &hkey, &dwDisposition);
-	if (result != ERROR_SUCCESS)
-		{
-			goto LFail;
+		goto LFail;
 		}
 
 	if ((dwDisposition == REG_CREATED_NEW_KEY && fSetDefault) || fSetKey)
 		{
-		// FIXME(bjrkk): This will absolutely fail, since the kszSocratesKey subkey only allows users to read.
-		result = RegCreateKeyEx(hkey, kszSocratesKey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hkey, &dwDisposition);
-		if (result != ERROR_SUCCESS)
-			{
-				goto LFail;
-			}
 LWriteValue:
 		if (fBinary)
 			{
@@ -1488,7 +1470,7 @@ bool APP::_FReadTitlesFromReg(PGST *ppgst)
 	if ((pgst = GST::PgstNew(size(long))) == pvNil)
 		goto LFail;
 	if (RegCreateKeyEx(HKEY_LOCAL_MACHINE, kszProductsKey, 0, NULL, REG_OPTION_NON_VOLATILE,
-			KEY_READ, NULL, &hkey, &dwDisposition) != ERROR_SUCCESS)
+			KEY_ALL_ACCESS, NULL, &hkey, &dwDisposition) != ERROR_SUCCESS)
 		{
 		Warn("Missing InstallDirectory registry entry or registry error");
 		goto LFail;
