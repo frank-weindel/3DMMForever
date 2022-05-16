@@ -1,3 +1,5 @@
-OBJ/
+obj/
 ._.DS_Store
 .DS_Store
+out/
+.vs/
