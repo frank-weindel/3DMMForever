@@ -17,7 +17,7 @@
 #define DEBUG_H
 
 #ifdef WIN
-inline void Debugger(void) { __asm { int 3 } }
+inline void Debugger(void) { __debugbreak(); }
 #endif //WIN
 
 #ifdef DEBUG

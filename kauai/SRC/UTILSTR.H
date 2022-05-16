@@ -393,7 +393,7 @@ public:
 
 	bool FFormat(PSTN pstnFormat, ...);
 	bool FFormatSz(PSZ pszFormat, ...);
-	bool FFormatRgch(achar *prgchFormat, long cchFormat, ulong *prgluData);
+	bool FFormatRgch(achar *prgchFormat, long cchFormat, size_t *prgluData);
 	bool FGetLw(long *plw, long lwBase = 0);
 	bool FExpandControls(void);
 	};

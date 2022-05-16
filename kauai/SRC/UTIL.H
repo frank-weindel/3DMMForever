@@ -18,7 +18,7 @@
 #include <stddef.h>
 
 // define the endian-ness
-#ifdef IN_80386
+#if defined(IN_80386) || REG_DWORD == REG_DWORD_LITTLE_ENDIAN
 #define LITTLE_ENDIAN
 #endif //IN_80386
 
@@ -46,6 +46,7 @@
 
 //windef.h typedef's PSZ to char *, this fools it into using PSZS instead
 #define PSZ PSZS
+#define _LPCVOID_DEFINED // So that winscard.h doesn't define it with const
 #include <windows.h>
 #include <windowsx.h>
 #include <vfw.h>
@@ -91,7 +92,7 @@ const long klwMin = -klwMax;	// so -klwMin is positive
 const ulong kluMax = 0xFFFFFFFF;
 const ulong kluMin = 0;
 
-typedef int bool;
+#define bool int
 
 // standard character types:
 // schar - short (skinny) character (1 byte)

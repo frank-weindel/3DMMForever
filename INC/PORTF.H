@@ -49,6 +49,7 @@ enum
 // The remainder of this file contains temporary stuff which are defined
 // in the win95 include files which we are not using yet.
 
+#if WINVER < 0x0400
 // From WINUSER.H...
 typedef struct tagNMHDR
 {
@@ -144,3 +145,4 @@ typedef LPOFNOTIFYA LPOFNOTIFY;
 #define CommDlg_OpenSave_SetControlText(_hdlg, _id, _text) \
         (void)SNDMSG(_hdlg, CDM_SETCONTROLTEXT, (WPARAM)_id, (LPARAM)(LPSTR)_text)
 
+#endif

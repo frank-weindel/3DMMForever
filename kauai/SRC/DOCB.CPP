@@ -2191,8 +2191,8 @@ void DMW::MarkMem(void)
 
 
 BEGIN_CMD_MAP(DSG, GOB)
-	ON_CID_ME(cidDoScroll, FCmdScroll, pvNil)
-	ON_CID_ME(cidEndScroll, FCmdScroll, pvNil)
+	ON_CID_ME(cidDoScroll, &DSG::FCmdScroll, pvNil)
+	ON_CID_ME(cidEndScroll, &DSG::FCmdScroll, pvNil)
 END_CMD_MAP_NIL()
 
 

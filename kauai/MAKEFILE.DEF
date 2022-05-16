@@ -52,7 +52,7 @@ DEFS = $(DEFS) /D"UNICODE"
 
 #CPPFLAGS = /c /YX /Fp"frame.pch" /W3 /Gz
 #PLACED PRECOMPILED HEADERS IN PROJ MAKEFILES
-CPPFLAGS = /c /YX /W3 /Gz /Gy
+CPPFLAGS = /c /W3 /Gz /Gy
 
 ASMFLAGS = -c
 !IF "$(BROWSE)" != ""
@@ -73,10 +73,10 @@ DEFS = $(DEFS) /D"DEBUG"
 CPPFLAGS = /Q68m $(CPPFLAGS)
 ASMFLAGS = $(ASMFLAGS) -s
 !ENDIF
-CPPFLAGS = /Gf /Ge $(CPPFLAGS)
+CPPFLAGS = /GF /Ge $(CPPFLAGS)
 !ELSE
-#CPPFLAGS = /Ogityb1 /Gs /Gf $(CPPFLAGS) REVIEW shonk: revert to this
-CPPFLAGS = /Ogityb1 /Gs /Gf $(CPPFLAGS)
+#CPPFLAGS = /Ogityb1 /Gs /GF $(CPPFLAGS) REVIEW shonk: revert to this
+CPPFLAGS = /Od /Gs /GF $(CPPFLAGS)
 !ENDIF
 
 
@@ -156,22 +156,23 @@ BLD_TYPE_DIR = macs
 !ENDIF
 
 
-
+# FIXME(clemenswasser): Use the actual AudioMan libs here:
 #AUDIO LIB
-!IF "$(ARCH)" == "WIN"
-!IF "$(TYPE)" == "DEBUG"
-AUDIO_LIB = $(KAUAI_ROOT)\elib\$(BLD_TYPE_DIR)\audiod.lib
-!ELSE IF "$(TYPE)" == "SHIP"
-AUDIO_LIB = $(KAUAI_ROOT)\elib\$(BLD_TYPE_DIR)\audios.lib
-!ENDIF
-!ENDIF
+#!IF "$(ARCH)" == "WIN"
+#!IF "$(TYPE)" == "DEBUG"
+#AUDIO_LIB = $(KAUAI_ROOT)\elib\$(BLD_TYPE_DIR)\audiod.lib
+#!ELSE IF "$(TYPE)" == "SHIP"
+#AUDIO_LIB = $(KAUAI_ROOT)\elib\$(BLD_TYPE_DIR)\audios.lib
+#!ENDIF
+#!ENDIF
+AUDIO_LIB = $(SOC_ROOT)\stub.lib
 
 
 #VIDEO FOR WINDOWS LIB
-VFW32_LIB = $(MSVCNT_ROOT)\lib\vfw32.lib
+VFW32_LIB = vfw32.lib
 
 #Windows WNet LIB
-WNET_LIB = $(MSVCNT_ROOT)\lib\mpr.lib
+WNET_LIB = mpr.lib
 
 #KAUAI OBJ DIRECTORIES
 KAUAI_OBJ_ROOT_DIR = $(KAUAI_ROOT)\obj

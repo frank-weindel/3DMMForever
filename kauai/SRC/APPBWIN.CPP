@@ -437,13 +437,13 @@ bool APPB::_FFrameWndProc(HWND hwnd, uint wm,
 			dypScreen = GetSystemMetrics(SM_CYSCREEN);
 			dypExtra = 0;
 
-			FGetProp(kpridFullScreen, &lw);
+			FGetProp(kpridFullScreen, (long*)&lw);
 			if (lw)
 				dypExtra = GetSystemMetrics(SM_CYCAPTION);
 			pmmi->ptMaxPosition.y = -dypFrame - dypExtra;
 			pmmi->ptMaxSize.y = pmmi->ptMaxTrackSize.y =
 				dypScreen + 2 * dypFrame + dypExtra;
-			_FCommonWndProc(hwnd, wm, wParam, (long)pmmi, &lw);
+			_FCommonWndProc(hwnd, wm, wParam, (long)pmmi, (long*)&lw);
 			}
 		return fTrue;
 

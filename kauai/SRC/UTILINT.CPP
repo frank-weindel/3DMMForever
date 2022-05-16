@@ -12,6 +12,7 @@
 
 ***************************************************************************/
 #include "util.h"
+#include <math.h>
 ASSERTNAME
 
 
@@ -89,7 +90,7 @@ long LwMulDivMod(long lw, long lwMul, long lwDiv, long *plwRem)
 	double dou;
 
 	dou = (double)lw * lwMul;
-	*plwRem = (long)(dou % lwDiv);
+	*plwRem = fmod(dou, lwDiv);
 	dou /= lwDiv;
 	Assert(dou <= klwMax && dou >= klwMin, "overflow in LwMulDiv");
 	return (long)dou;

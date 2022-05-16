@@ -211,7 +211,7 @@ LDone:
 	long *psw1, *psw2;
 	long sw;
 
-	for (psw2 = (psw1 = (short *)pv) + csw - 1; psw1 < psw2; )
+	for (psw2 = (psw1 = (long *)pv) + csw - 1; psw1 < psw2; )
 		{
 		sw = *psw1;
 		*psw1++ = *psw2;
@@ -455,7 +455,7 @@ LDone:
 	Compare the two buffers byte for byte and return a the number of bytes
 	that match.
 ***************************************************************************/
-long CbEqualRgb(void *pv1, void *pv2, long cb)
+ptrdiff_t CbEqualRgb(void *pv1, void *pv2, long cb)
 {
 	AssertIn(cb, 0, kcbMax);
 	AssertPvCb(pv1, cb);
@@ -529,7 +529,7 @@ ulong FcmpCompareRgb(void *pv1, void *pv2, long cb)
 	AssertPvCb(pv1, cb);
 	AssertPvCb(pv2, cb);
 
-	long cbMatch = CbEqualRgb(pv1, pv2, cb);
+	ptrdiff_t cbMatch = CbEqualRgb(pv1, pv2, cb);
 
 	AssertIn(cbMatch, 0, cb + 1);
 	if (cb == cbMatch)

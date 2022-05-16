@@ -7,6 +7,14 @@ under the [MIT license](LICENSE) as open source.
 
 ## Building instructions
 
+### Easy Mode
+I managed to make it buildable on my machine with VS 2022 and Windows 11.
+Just launch a "Native Tools Command Prompt for VS" (preferably x86, as porting to 64-bit is WIP and might not work) and build:
+```powershell
+.\build.ps1
+```
+
+### Advanced
 This project is unlikely to build successfully under modern hardware/software, but you can get started with compilation and get partial completed binaries. Here's what will get you going. Thanks to Mac Sample for their work on getting this far!
 
 - Make sure this repo is checked out to a folder with a short name, ideally right on the root of a drive (i.e. C:\3d).
