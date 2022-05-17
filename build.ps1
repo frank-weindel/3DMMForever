@@ -25,5 +25,3 @@ if($LASTEXITCODE) {
   Write-Error 'Build failed'
   return;
 }
-
-cp $PSScriptRoot\OBJ\wins\3dmovie.exe 'C:\Program Files (x86)\Microsoft Kids\3D Movie Maker\'
