@@ -5,7 +5,7 @@ include_directories(../../inc ../../kauai/src ../../bren/inc ../../src)
 add_compile_definitions(WIN)
 
 # utestscb.cpp left out !!!
-add_executable(3dmovie WIN32 utest.rc CreateConsole.cpp ape.cpp browser.cpp esl.cpp mminstal.cpp popup.cpp portf.cpp scnsort.cpp splot.cpp stdiobrw.cpp stdioscb.cpp studio.cpp tatr.cpp tgob.cpp utest.cpp)
+add_executable(3dmovie WIN32 utest.rc ape.cpp browser.cpp esl.cpp mminstal.cpp popup.cpp portf.cpp scnsort.cpp splot.cpp stdiobrw.cpp stdioscb.cpp studio.cpp tatr.cpp tgob.cpp utest.cpp)
 add_dependencies(3dmovie kauai engine)
 
 set_property(TARGET 3dmovie PROPERTY
