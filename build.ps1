@@ -7,13 +7,12 @@ if(!$env:BUILD_ENV) {
   $env:CHAR='UNICODE';
   $env:PROJ='SOC';
   $env:TYPE='DBSHIP';
+  $env:CHIP='IN_80386';
   $env:BUILD_ENV=$true;
 }
-cl /nologo /c "$env:SOC_ROOT\stub.cpp" "/Fo$env:SOC_ROOT\stub.obj" `
-&& lib /nologo "$env:SOC_ROOT\stub.obj" "/OUT:$env:SOC_ROOT\stub.lib" `
-&& Push-Location .\kauai `
-&& nmake /nologo;
 
+Push-Location .\kauai
+nmake /nologo;
 Pop-Location;
 
 if($LASTEXITCODE) {
@@ -26,3 +25,5 @@ if($LASTEXITCODE) {
   Write-Error 'Build failed'
   return;
 }
+
+cp $PSScriptRoot\OBJ\wins\3dmovie.exe 'C:\Program Files (x86)\Microsoft Kids\3D Movie Maker\'

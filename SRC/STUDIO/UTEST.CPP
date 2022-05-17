@@ -19,6 +19,8 @@
 #include "studio.h"
 #include "socres.h"
 #include "mminstal.h"
+#include "stdio.h"
+#include "createconsole.h"
 
 ASSERTNAME
 
@@ -179,6 +181,10 @@ bool APP::_FInit(ulong grfapp, ulong grfgob, long ginDef)
 	ulong tsSplashScreen;
 	FNI fniUserDoc;
 	long fFirstTimeUser;
+
+	#ifdef DEBUG
+	CreateConsole();
+	#endif
 
 	// Only allow one copy of 3DMM to run at a time:
 	if (_FAppAlreadyRunning())
@@ -1081,6 +1087,9 @@ bool APP::_FOpenResourceFile(void)
 			return fFalse;
 			}
 		}
+	
+	fni.GetStnPath(&stn);
+	printf("path to resource file: %s\n", stn.Prgch());
 	_pcfl = CFL::PcflOpen(&fni, fcflNil);
 	if (pvNil == _pcfl)
 		return fFalse;
