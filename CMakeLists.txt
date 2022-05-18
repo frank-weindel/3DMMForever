@@ -1,9 +1,12 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.22)
 project(3DMMForever LANGUAGES CXX C)
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 set(CMAKE_CXX_STANDARD 14)
+
+add_compile_definitions(IN_80386)
+add_compile_definitions(STRICT)
 
 find_package(AudioMan REQUIRED)
 find_package(BRender REQUIRED)
@@ -58,14 +61,16 @@ add_library(engine)
 file(GLOB engine-sources CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/SRC/ENGINE/*.CPP")
 target_sources(engine PRIVATE ${engine-sources})
 target_include_directories(engine PUBLIC
-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/INC>)
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/INC>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/SRC>)
+
 target_link_libraries(engine PUBLIC kauai brender)
 
 # On non-windows WIN32 is a no-op
 add_executable(studio WIN32)
 file(GLOB studio-sources CONFIGURE_DEPENDS
   "${PROJECT_SOURCE_DIR}/src/studio/*.cpp"
-  "${PROJECT_SOUREC_DIR}/src/studio/*.rc")
+  "${PROJECT_SOURCE_DIR}/src/studio/*.rc")
 list(FILTER studio-sources EXCLUDE REGEX "UTESTSCB.CPP$")
 target_sources(studio PRIVATE ${studio-sources})
 target_include_directories(studio PUBLIC $<TARGET_PROPERTY:engine,INCLUDE_DIRECTORIES>)
@@ -75,4 +80,4 @@ set_property(TARGET studio PROPERTY OUTPUT_NAME 3dmovie)
 # This resolves the linker warning where multiple runtime libraries are linked in.
 target_link_options(studio
   BEFORE PRIVATE
-    $<$<AND:$<LINK_LANG_AND_ID:CXX,MSVC>,$<CONFIG:DEBUG>>:/NODEFAULTLIB:libcmt.lib>)
+    $<$<AND:$<LINK_LANG_AND_ID:CXX,MSVC>,$<CONFIG:DEBUG>>:/NODEFAULTLIB:libcmt.lib> /MANIFESTUAC:NO)

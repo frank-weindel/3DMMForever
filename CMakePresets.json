@@ -5,7 +5,11 @@
       "name": "base",
       "hidden": true,
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build"
+      "binaryDir": "${sourceDir}/build",
+      "architecture": {
+        "strategy": "external",
+        "value": "x86"
+      }
     },
     {
       "name": "msvc:base",

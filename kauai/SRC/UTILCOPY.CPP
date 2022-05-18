@@ -399,7 +399,7 @@ void MoveElement(void *prgv, long cbElement, long ivSrc, long ivTarget)
 /***************************************************************************
 	Check for equality of two blocks.
 ***************************************************************************/
-bool FEqualRgb(void *pv1, void *pv2, long cb)
+int FEqualRgb(void *pv1, void *pv2, long cb)
 {
 	AssertIn(cb, 0, kcbMax);
 	AssertPvCb(pv1, cb);
@@ -407,7 +407,7 @@ bool FEqualRgb(void *pv1, void *pv2, long cb)
 
 #ifdef IN_80386
 
-	bool fRet;
+	int fRet;
 
 	__asm
 		{
