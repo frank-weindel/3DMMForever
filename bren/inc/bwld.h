@@ -65,6 +65,7 @@ class BWLD : public BWLD_PAR
     CNO _cnoRGB;
     CTG _ctgZ;
     CNO _cnoZ;
+    PGL _ppal;
 
   protected:
     BWLD(void)
@@ -92,7 +93,7 @@ class BWLD : public BWLD_PAR
     void MarkRenderedRegn(PGOB pgob, long dxp, long dyp);
 
     // Background stuff
-    bool FSetBackground(PCRF pcrf, CTG ctgRGB, CNO cnoRGB, CTG ctgZ, CNO cnoZ);
+    bool FSetBackground(PCRF pcrf, CTG ctgRGB, CNO cnoRGB, CTG ctgZ, CNO cnoZ, PGL ppal);
     void SetCamera(BMAT34 *pbmat34, BRS zrHither, BRS zrYon, BRA aFov);
     void GetCamera(BMAT34 *pbmat34, BRS *pzrHither = pvNil, BRS *pzrYon = pvNil, BRA *paFov = pvNil);
 

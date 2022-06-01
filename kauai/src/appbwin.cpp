@@ -111,6 +111,12 @@ bool APPB::_FInitOS(void)
     if (hNil == (vwig.hdcApp = GetDC(vwig.hwndApp)))
         return fFalse;
 
+    int a = GetDeviceCaps(vwig.hdcApp, TECHNOLOGY);
+    int b = GetDeviceCaps(vwig.hdcApp, HORZRES);
+    int c = GetDeviceCaps(vwig.hdcApp, VERTRES);
+    int d = GetDeviceCaps(vwig.hdcApp, BITSPIXEL);
+    int e = GetDeviceCaps(vwig.hdcApp, SIZEPALETTE);
+
     // set a timer, so we can idle regularly.
     if (SetTimer(vwig.hwndApp, 0, 1, pvNil) == 0)
         return fFalse;

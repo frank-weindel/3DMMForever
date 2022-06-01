@@ -11,6 +11,7 @@
 
 ***************************************************************************/
 #include "frame.h"
+#include "DebugWindow.h"
 ASSERTNAME
 
 const SCR kscrBlack = PALETTERGB(0, 0, 0);
@@ -94,7 +95,6 @@ static PALETTEENTRY _rgpe[20] = {
 
     {0xFF, 0xFB, 0xF0, 0}, {0xA0, 0xA0, 0xA4, 0}, {0x80, 0x80, 0x80, 0}, {0xFF, 0, 0, 0},       {0, 0xFF, 0, 0},
     {0xFF, 0xFF, 0, 0},    {0, 0, 0xFF, 0},       {0xFF, 0, 0xFF, 0},    {0, 0xFF, 0xFF, 0},    {0xFF, 0xFF, 0xFF, 0},
-
 };
 
 /***************************************************************************
@@ -162,7 +162,7 @@ void GPT::SetActiveColors(PGL pglclr, ulong grfpal)
             return;
         }
         SelectPalette(vwig.hdcApp, _hpal, fTrue);
-        RealizePalette(vwig.hdcApp);
+        RealizePalette(vwig.hdcApp); // !!!
         _cclrPal = 256;
     }
 
@@ -186,7 +186,7 @@ void GPT::SetActiveColors(PGL pglclr, ulong grfpal)
             _cclrPal = 0;
         }
         SelectPalette(vwig.hdcApp, _hpal, fFalse);
-        RealizePalette(vwig.hdcApp);
+        RealizePalette(vwig.hdcApp); // !!!
         goto LDone;
     }
 
@@ -267,7 +267,7 @@ void GPT::SetActiveColors(PGL pglclr, ulong grfpal)
                 AssertDo(ResizePalette(_hpal, cclr), "Shrinking palette failed");
             _cclrPal = cclr;
             SelectPalette(vwig.hdcApp, _hpal, fFalse);
-            RealizePalette(vwig.hdcApp);
+            RealizePalette(vwig.hdcApp); // !!!
         }
     }
     else
@@ -276,6 +276,47 @@ void GPT::SetActiveColors(PGL pglclr, ulong grfpal)
 LDone:
     _cactPalCur++;
     vcactRealize++;
+}
+
+HPALETTE GPT::CreatePal(PGL pglclr)
+{
+    byte rgb[size(LOGPALETTE) + 256 * size(PALETTEENTRY)];
+    LOGPALETTE *ppal = (LOGPALETTE *)rgb;
+    PALETTEENTRY pe;
+    long ipe, ipeLim;
+    ppal->palVersion = 0x0300;
+
+    // NOTE(frank-weindel):
+    // We support two types of GLCRs coming in based on number of entries:
+    // - 236 colors
+    //	 - These are the middle 236 colors used mainly in 3DMM scenes
+    //   - The other colors must be supplied by the system palette
+    // - 256 colors
+    //   - This is a full palette, but we still override with system colors on
+    //     the ends because they should be that way anyway.
+    //   - The only GLCR with 256 colors may be the main GLCR in 3dmovie.chk
+    long palMin = 0;
+    long palMax = 255;
+    if (pglclr->IvMac() == 236)
+    {
+        palMin = 10;
+        palMax = 245;
+    }
+
+    for (ipe = palMin; ipe <= palMax; ipe++)
+    {
+        CLR color = *(CLR *)pglclr->QvGet(ipe - palMin);
+        ppal->palPalEntry[ipe].peRed = color.bRed;
+        ppal->palPalEntry[ipe].peGreen = color.bGreen;
+        ppal->palPalEntry[ipe].peBlue = color.bBlue;
+    }
+
+    // Always override with System Palette Entries
+    GetSystemPaletteEntries(vwig.hdcApp, 0, 10, ppal->palPalEntry);
+    GetSystemPaletteEntries(vwig.hdcApp, 246, 10, ppal->palPalEntry + 246);
+
+    ppal->palNumEntries = 256;
+    return CreatePalette(ppal);
 }
 
 /***************************************************************************
@@ -353,6 +394,12 @@ PGPT GPT::PgptNew(HDC hdc)
         ReleasePpo(&pgpt);
 
     AssertNilOrPo(pgpt, 0);
+
+    int a = GetDeviceCaps(hdc, TECHNOLOGY);
+    int b = GetDeviceCaps(hdc, HORZRES);
+    int c = GetDeviceCaps(hdc, VERTRES);
+    int d = GetDeviceCaps(hdc, BITSPIXEL);
+    int e = GetDeviceCaps(hdc, SIZEPALETTE);
     return pgpt;
 }
 
@@ -379,6 +426,13 @@ PGPT GPT::PgptNewHwnd(HWND hwnd)
 
     pgpt->_hwnd = hwnd;
     AssertPo(pgpt, 0);
+
+    int a = GetDeviceCaps(hdc, TECHNOLOGY);
+    int b = GetDeviceCaps(hdc, HORZRES);
+    int c = GetDeviceCaps(hdc, VERTRES);
+    int d = GetDeviceCaps(hdc, BITSPIXEL);
+    int e = GetDeviceCaps(hdc, SIZEPALETTE);
+
     return pgpt;
 }
 
@@ -479,7 +533,7 @@ SCR GPT::_Scr(ACR acr)
 /***************************************************************************
     Static method to create an offscreen port.
 ***************************************************************************/
-PGPT GPT::PgptNewOffscreen(RC *prc, long cbitPixel)
+PGPT GPT::PgptNewOffscreen(RC *prc, long cbitPixel, PALETTEENTRY *pColors)
 {
     AssertVarMem(prc);
     Assert(!prc->FEmpty(), "empty rectangle for offscreen");
@@ -580,7 +634,18 @@ PGPT GPT::PgptNewOffscreen(RC *prc, long cbitPixel)
                 goto LFail;
             }
         }
-        if (_prgclr != pvNil)
+        if (pColors != pvNil) // Explicit Palette
+        {
+            for (int i = 0; i < 256; i++)
+            {
+                PALETTEENTRY pe = pColors[i];
+                pbmi->bmiColors[i].rgbRed = pe.peRed;
+                pbmi->bmiColors[i].rgbGreen = pe.peGreen;
+                pbmi->bmiColors[i].rgbBlue = pe.peBlue;
+                pbmi->bmiColors[i].rgbReserved = 0;
+            }
+        }
+        else if (_prgclr != pvNil)
         {
             CopyPb(_prgclr, pbmi->bmiColors, LwMul(LwMin(cclr, _cclrPal), size(RGBQUAD)));
         }
@@ -1101,7 +1166,7 @@ void GPT::_EnsurePalette(void)
         if (!SelectPalette(_hdc, _hpal, fFalse))
             _fMapIndices = fTrue;
         else
-            RealizePalette(_hdc);
+            RealizePalette(_hdc); // !!!
     }
     _cactPal = _cactPalCur;
 }
@@ -1460,7 +1525,7 @@ void GPT::_SetTextProps(DSF *pdsf)
         TA_CENTER, // tahCenter
         TA_RIGHT   // tahRight
     };
-    static _mptavw[] = {
+    static int _mptavw[] = {
         TA_TOP,      // tavTop
         TA_TOP,      // tavCenter + code
         TA_BASELINE, // tavBaseline
@@ -1644,7 +1709,7 @@ void GPT::DrawPic(PPIC ppic, RCS *prcs, GDD *pgdd)
     Draw the masked bitmap in the given rectangle.  pgdd->prcsClip is the
     clipping rectangle.
 ***************************************************************************/
-void GPT::DrawMbmp(PMBMP pmbmp, RCS *prcs, GDD *pgdd)
+void GPT::DrawMbmp(PMBMP pmbmp, RCS *prcs, GDD *pgdd, PGL pglclr)
 {
     AssertThis(0);
     AssertPo(pmbmp, 0);
@@ -1693,33 +1758,69 @@ void GPT::DrawMbmp(PMBMP pmbmp, RCS *prcs, GDD *pgdd)
 
         ptSrc = rcSrc.PtTopLeft();
         rcSrc.OffsetToOrigin();
-        if (pvNil == (pgpt = GPT::PgptNewOffscreen(&rcSrc, 1)))
-        {
-            Warn("Drawing MBMP failed");
-            return;
-        }
-        Assert(pgpt->_rcOff == rcSrc, 0);
-        pmbmp->DrawMask(pgpt->_prgbPixels, pgpt->_cbRow, rcSrc.Dyp(), -ptSrc.xp, -ptSrc.yp, &rcSrc);
+        // FIXME(frank-weindel): Add back in masking code!
+        // if (pvNil == (pgpt = GPT::PgptNewOffscreen(&rcSrc, 1)))
+        //	{
+        //	Warn("Drawing MBMP failed");
+        //	return;
+        //	}
+        // Assert(pgpt->_rcOff == rcSrc, 0);
+        // pmbmp->DrawMask(pgpt->_prgbPixels, pgpt->_cbRow, rcSrc.Dyp(),
+        //	-ptSrc.xp, -ptSrc.yp, &rcSrc);
 
         // set the mask bits to white
-        _SetClip(pgdd->prcsClip);
-        StretchBlt(_hdc, rcDst.xpLeft, rcDst.ypTop, rcDst.Dxp(), rcDst.Dyp(), pgpt->_hdc, 0, 0, rcSrc.Dxp(),
-                   rcSrc.Dyp(), SRCPAINT);
-        ReleasePpo(&pgpt);
+        //_SetClip(pgdd->prcsClip);
+        // StretchBlt(_hdc, rcDst.xpLeft, rcDst.ypTop, rcDst.Dxp(), rcDst.Dyp(),
+        //	pgpt->_hdc, 0, 0, rcSrc.Dxp(), rcSrc.Dyp(), SRCPAINT);
+        // ReleasePpo(&pgpt);
 
-        if (pvNil == (pgpt = GPT::PgptNewOffscreen(&rcSrc, 8)))
+        HPALETTE hpal = hNil;
+        PALETTEENTRY ppal[256];
+        if (pglclr != pvNil)
+        {
+            dbgWin.DrawPalette(pglclr, rcSrc.Dxp(), 0);
+            hpal = CreatePal(pglclr);
+            GetPaletteEntries(hpal, 0, 256, ppal);
+        }
+
+        if (pvNil == (pgpt = GPT::PgptNewOffscreen(&rcSrc, 8, (PALETTEENTRY *)(void *)ppal)))
         {
             Warn("Drawing MBMP failed");
             return;
         }
-        RCS rcs = rcSrc;
-        FillRect(pgpt->_hdc, &rcs, (HBRUSH)GetStockObject(WHITE_BRUSH));
-
+        // RCS rcs = rcSrc;
+        // FillRect(pgpt->_hdc, &rcs, (HBRUSH)GetStockObject(WHITE_BRUSH));
         Flush();
-        pmbmp->Draw(pgpt->_prgbPixels, pgpt->_cbRow, rcSrc.Dyp(), -ptSrc.xp, -ptSrc.yp, &rcSrc);
+        pmbmp->Draw(pgpt->_prgbPixels, pgpt->_cbRow, rcSrc.Dyp(), -ptSrc.xp, -ptSrc.yp);
 
-        StretchBlt(_hdc, rcDst.xpLeft, rcDst.ypTop, rcDst.Dxp(), rcDst.Dyp(), pgpt->_hdc, 0, 0, rcSrc.Dxp(),
-                   rcSrc.Dyp(), SRCAND);
+        long dxp = rcDst.Dxp();
+        long dyp = rcDst.Dyp();
+
+        int a = GetDeviceCaps(_hdc, TECHNOLOGY);
+        int b = GetDeviceCaps(_hdc, HORZRES);
+        int c = GetDeviceCaps(_hdc, VERTRES);
+        int d = GetDeviceCaps(_hdc, BITSPIXEL);
+        int e = GetDeviceCaps(_hdc, SIZEPALETTE);
+
+        int a2 = GetDeviceCaps(pgpt->_hdc, TECHNOLOGY);
+        int b2 = GetDeviceCaps(pgpt->_hdc, HORZRES);
+        int c2 = GetDeviceCaps(pgpt->_hdc, VERTRES);
+        int d2 = GetDeviceCaps(pgpt->_hdc, BITSPIXEL);
+        int e2 = GetDeviceCaps(pgpt->_hdc, SIZEPALETTE);
+
+        // GNV gnvDbg(dbgWin.pgpt);
+
+        StretchBlt(dbgWin.hdc, rcDst.xpLeft, rcDst.ypTop, dxp, dyp, pgpt->_hdc, 0, 0, rcSrc.Dxp(), rcSrc.Dyp(),
+                   SRCCOPY);
+        SaveDC(dbgWin.hdc);
+
+        RestoreDC(dbgWin.hdc, -1);
+
+        StretchBlt(_hdc, rcDst.xpLeft, rcDst.ypTop, dxp, dyp, pgpt->_hdc, 0, 0, rcSrc.Dxp(), rcSrc.Dyp(), SRCCOPY);
+        if (hpal != hNil)
+        {
+            DeleteObject(hpal);
+        }
         ReleasePpo(&pgpt);
     }
 }

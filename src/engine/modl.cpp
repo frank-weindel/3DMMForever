@@ -384,7 +384,7 @@ bool MODL::_FPrelight(long cblit, BVEC3 *prgbvec3Light)
         BrLightEnable(pbactLight);
     }
 
-    pbpmpRGB = BrPixelmapAllocate(BR_PMT_INDEX_8, 544, 306, 0, 0);
+    pbpmpRGB = BrPixelmapAllocate(BR_PMT_RGB_888, 544, 306, 0, 0);
     pbpmpZ = BrPixelmapAllocate(BR_PMT_DEPTH_16, 544, 306, 0, 0);
 
     pbmtl = BrMaterialAllocate("Prelighting material");

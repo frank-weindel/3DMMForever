@@ -759,7 +759,7 @@ UINT CALLBACK OpenHookProc(HWND hwndCustom, UINT msg, UINT wParam, LONG lParam)
                     {
                         if ((pgnvOff = NewObj GNV(pgptOff)) != pvNil)
                         {
-                            pgnvOff->DrawMbmp(pmbmp, rcItem.xpLeft, rcItem.ypTop);
+                            pgnvOff->DrawMbmp(pmbmp, rcItem.xpLeft, rcItem.ypTop, NULL);
 
                             gnv.CopyPixels(pgnvOff, &rcItem, &rcItem);
                             GPT::Flush();
@@ -1162,7 +1162,7 @@ void RepaintPortfolio(HWND hwndCustom)
                             MapWindowPoints(hwndBtn, hwndCustom, (POINT *)&rcsBtn, 2);
                             rcItem = rcsBtn;
 
-                            pgnvOff->DrawMbmp(pmbmpBtn, rcItem.xpLeft, rcItem.ypTop);
+                            pgnvOff->DrawMbmp(pmbmpBtn, rcItem.xpLeft, rcItem.ypTop, NULL);
 
                             ReleasePpo(&pmbmpBtn);
                         }

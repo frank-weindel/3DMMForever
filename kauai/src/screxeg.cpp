@@ -11,6 +11,7 @@
 
 ***************************************************************************/
 #include "kidframe.h"
+#include "DebugWindow.h"
 ASSERTNAME
 
 RTCLASS(SCEG)
@@ -1180,7 +1181,7 @@ void SCEG::_SetColorTable(CNO cno)
 
     if (pvNil == (pglclr = _PglclrGet(cno)))
         return;
-
+    dbgWin.DrawPalette(pglclr, 0, 300);
     GPT::SetActiveColors(pglclr, fpalIdentity);
     ReleasePpo(&pglclr);
 }

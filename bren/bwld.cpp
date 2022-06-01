@@ -18,6 +18,7 @@
 
 ***************************************************************************/
 #include "bren.h"
+#include "DebugWindow.h"
 
 // REVIEW *****: _pgptStretch is completely unused...remove it!
 
@@ -25,8 +26,8 @@ ASSERTNAME
 
 RTCLASS(BWLD)
 
-const long kcbitPixelRGB = 8; // RGB buffers are 8 bits deep
-const long kcbPixelRGB = 1;
+const long kcbitPixelRGB = 24; // RGB buffers are 8 bits deep
+const long kcbPixelRGB = 3;
 
 const long kcbitPixelZ = 16; // Z buffers are 16 bits deep
 const long kcbPixelZ = 2;
@@ -69,7 +70,7 @@ bool BWLD::_FInit(long dxp, long dyp, bool fHalfX, bool fHalfY)
     if (!_fBRenderInited)
     {
         BrBegin();
-        BrZbBegin(BR_PMT_INDEX_8, BR_PMT_DEPTH_16);
+        BrZbBegin(BR_PMT_RGB_888, BR_PMT_DEPTH_16);
         _fBRenderInited = fTrue;
     }
 
@@ -160,8 +161,8 @@ bool BWLD::_FInitBuffers(long dxp, long dyp, bool fHalfX, bool fHalfY)
     _pgptWorking = GPT::PgptNewOffscreen(&_rcBuffer, kcbitPixelRGB);
     if (pvNil == _pgptWorking)
         return fFalse;
-    Assert(kcbitPixelRGB == 8, "change _bpmpRGB.type");
-    _bpmpRGB.type = BR_PMT_INDEX_8;
+    Assert(kcbitPixelRGB == 24, "change _bpmpRGB.type");
+    _bpmpRGB.type = BR_PMT_RGB_888;
     _bpmpRGB.row_bytes = (short)LwMul(dxp, kcbPixelRGB);
     _bpmpRGB.width = (ushort)dxp;
     _bpmpRGB.height = (ushort)dyp;
@@ -236,7 +237,7 @@ bool BWLD::FSetHalfMode(bool fHalfX, bool fHalfY)
     if (pvNil != _pcrf)
     {
         // Reload the background at the new resolution
-        if (!FSetBackground(_pcrf, _ctgRGB, _cnoRGB, _ctgZ, _cnoZ))
+        if (!FSetBackground(_pcrf, _ctgRGB, _cnoRGB, _ctgZ, _cnoZ, _ppal))
             goto LFail;
     }
 
@@ -323,7 +324,7 @@ inline void SqueezePb(void *pvSrc, void *pvDst, long cbSrc)
     Load bitmaps from the given chunks into _pgptBackground and
     _pzbmpBackground.
 ***************************************************************************/
-bool BWLD::FSetBackground(PCRF pcrf, CTG ctgRGB, CNO cnoRGB, CTG ctgZ, CNO cnoZ)
+bool BWLD::FSetBackground(PCRF pcrf, CTG ctgRGB, CNO cnoRGB, CTG ctgZ, CNO cnoZ, PGL ppal)
 {
     AssertThis(0);
     AssertPo(pcrf, 0);
@@ -371,7 +372,7 @@ bool BWLD::FSetBackground(PCRF pcrf, CTG ctgRGB, CNO cnoRGB, CTG ctgZ, CNO cnoZ)
         GNV gnvFull(pgptFull);
         GNV gnvHalf(_pgptBackground);
 
-        gnvFull.DrawMbmp(pmbmpNew, 0, 0);
+        gnvFull.DrawMbmp(pmbmpNew, 0, 0, ppal);
         ReleasePpo(&pmbmpNew);
         gnvHalf.CopyPixels(&gnvFull, &_rcView, &_rcBuffer);
         ReleasePpo(&pgptFull);
@@ -397,7 +398,10 @@ bool BWLD::FSetBackground(PCRF pcrf, CTG ctgRGB, CNO cnoRGB, CTG ctgZ, CNO cnoZ)
     else // not in half mode
     {
         GNV gnv(_pgptBackground);
-        gnv.DrawMbmp(pmbmpNew, 0, 0);
+        // !!!Background
+        // GNV gnvDbg(dbgWin.pgpt);
+        // gnvDbg.DrawMbmp(pmbmpNew, 0, 0);
+        gnv.DrawMbmp(pmbmpNew, 0, 0, ppal); // !!!LOADS THE BACKROUND
         ReleasePpo(&pmbmpNew);
 
         ReleasePpo(&_pzbmpBackground);
@@ -417,6 +421,7 @@ bool BWLD::FSetBackground(PCRF pcrf, CTG ctgRGB, CNO cnoRGB, CTG ctgZ, CNO cnoZ)
     _cnoRGB = cnoRGB;
     _ctgZ = ctgZ;
     _cnoZ = cnoZ;
+    _ppal = ppal;
 
     return fTrue;
 }
@@ -500,6 +505,7 @@ void BWLD::Render(void)
     // then clear _pregnDirtyWorking.
     _pregnDirtyScreen->FUnion(_pregnDirtyWorking);
     _pregnDirtyWorking->SetRc(pvNil);
+    //_pregnDirtyWorking->SetRc(&_rcBuffer);
 
     // Render the scene.  This will add stuff to _pregnDirtyWorking
     BrZbSceneRender(&_bactWorld, &_bactCamera, &_bpmpRGB, &_bpmpZ);
@@ -557,7 +563,7 @@ void BWLD::Unprerender(void)
 
     // Ignore error...you'll just get weird visual effects and an error
     // will be reported elsewhere
-    FSetBackground(_pcrf, _ctgRGB, _cnoRGB, _ctgZ, _cnoZ);
+    FSetBackground(_pcrf, _ctgRGB, _cnoRGB, _ctgZ, _cnoZ, _ppal);
 }
 
 /***************************************************************************
@@ -578,6 +584,7 @@ void BWLD::_CleanWorkingBuffers(void)
     long cbRowCopy;
     RC rc;
     long cbRowSrc, cbRowDst;
+    long cBitPixel;
 
     if (_pregnDirtyWorking->FEmpty(&rcRegnBounds))
         return;
@@ -592,21 +599,27 @@ void BWLD::_CleanWorkingBuffers(void)
     regsc.Init(_pregnDirtyWorking, &rcClippedRegnBounds);
     yp = rcClippedRegnBounds.ypTop;
     cbRowSrc = _pgptBackground->CbRow();
-    pbSrc = _pgptBackground->PrgbLockPixels() + LwMul(yp, cbRowSrc) + rcClippedRegnBounds.xpLeft;
+    pbSrc = _pgptBackground->PrgbLockPixels() + LwMul(yp, cbRowSrc);
     cbRowDst = _pgptWorking->CbRow();
-    pbDst = _pgptWorking->PrgbLockPixels() + LwMul(yp, cbRowDst) + rcClippedRegnBounds.xpLeft;
+    pbDst = _pgptWorking->PrgbLockPixels() + LwMul(yp, cbRowDst);
+    cBitPixel = _pgptBackground->CbitPixel();
+    Assert(cBitPixel == _pgptWorking->CbitPixel(), "buffer bits per pixel is different");
     for (; yp < rcClippedRegnBounds.ypBottom; yp++)
     {
-        while (regsc.XpCur() < klwMax)
-        {
-            xpLeft = regsc.XpCur();
-            cbRowCopy = regsc.XpFetch() - xpLeft;
-            regsc.XpFetch();
-            CopyPb(pbSrc + xpLeft, pbDst + xpLeft, cbRowCopy);
-        }
+        // FIXME(frank-weindel): Fix all this region selective copying
+        // Disabled all this now until there's time to figure out how it works
+        // It seems coupled to 8-bits per pixel
+        // while (regsc.XpCur() < klwMax)
+        // 	{
+        // 	xpLeft = regsc.XpCur();
+        // 	cbRowCopy = (regsc.XpFetch() - xpLeft) * cBitPixel;
+        // 	regsc.XpFetch();
+        // 	CopyPb(pbSrc + xpLeft, pbDst + xpLeft, cbRowCopy);
+        // 	}
+        CopyPb(pbSrc, pbDst, cbRowSrc);
         pbSrc += cbRowSrc;
         pbDst += cbRowDst;
-        regsc.ScanNext(1);
+        // regsc.ScanNext(1);
     }
     _pgptWorking->Unlock();
     _pgptBackground->Unlock();
@@ -663,7 +676,9 @@ void BWLD::Draw(PGNV pgnv, RC *prcClip, long dxp, long dyp)
     GNV gnvTemp(_pgptWorking);
 
     rc.OffsetCopy(&_rcView, -dxp, -dyp);
-    pgnv->CopyPixels(&gnvTemp, &_rcBuffer, &rc);
+
+    // !!!DRAW
+    pgnv->CopyPixels(&gnvTemp, &_rcBuffer, &rc); // !!! WHERE DRAWING HAPPENS
 }
 
 /***************************************************************************

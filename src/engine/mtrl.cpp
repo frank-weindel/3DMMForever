@@ -147,19 +147,25 @@ bool MTRL::_FInit(PCRF pcrf, CTG ctg, CNO cno)
     if (pvNil == _pbmtl)
         return fFalse;
     CopyPb(&pmtrlThis, _pbmtl->identifier, size(long));
-    _pbmtl->colour = mtrlf.brc;
+
+    const int r = (rand() & 2) * 255;
+    const int g = (rand() & 2) * 255;
+    const int b = (rand() & 2) * 255;
+    _pbmtl->colour = mtrlf.brc; // BR_COLOUR_RGB(r, g, b);
     _pbmtl->ka = mtrlf.brufKa;
     _pbmtl->kd = mtrlf.brufKd;
     // Note: for socrates, mtrlf.brufKs should be zero
-    _pbmtl->ks = mtrlf.brufKs;
+    _pbmtl->ks = mtrlf.brufKs; // BR_UFRACTION(0.60);
 
     _pbmtl->power = mtrlf.rPower;
     _pbmtl->index_base = mtrlf.bIndexBase;
     _pbmtl->index_range = mtrlf.cIndexRange;
+    // _pbmtl->index_base = 0;
+    // _pbmtl->index_range = 63;
     _pbmtl->opacity = kbOpaque; // all socrates objects are opaque
 
     // REVIEW *****: also set the BR_MATF_PRELIT flag to use prelit models
-    _pbmtl->flags = BR_MATF_LIGHT | BR_MATF_SMOOTH;
+    _pbmtl->flags = 0; // BR_MATF_LIGHT | BR_MATF_SMOOTH;
 
     // now read texture map, if any
     if (pcfl->FGetKidChidCtg(ctg, cno, 0, kctgTmap, &kid))

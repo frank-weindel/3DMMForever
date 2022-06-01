@@ -1271,7 +1271,7 @@ PGPT APPB::_PgptEnsure(RC *prc)
     {
         ReleasePpo(&_pgptOff);
         rc.Set(0, 0, LwMax(prc->Dxp(), _dxpOff), LwMax(prc->Dyp(), _dypOff));
-        _pgptOff = GPT::PgptNewOffscreen(&rc, 8);
+        _pgptOff = GPT::PgptNewOffscreen(&rc, 24);
         if (pvNil != _pgptOff)
         {
             _dxpOff = rc.Dxp();

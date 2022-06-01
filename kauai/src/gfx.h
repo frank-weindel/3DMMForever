@@ -546,7 +546,7 @@ class GNV : public GNV_PAR
     // bitmaps and pictures
     void CopyPixels(PGNV pgnvSrc, RC *prcSrc, RC *prcDst);
     void DrawPic(PPIC ppic, RC *prc);
-    void DrawMbmp(PMBMP pmbmp, long xp, long yp);
+    void DrawMbmp(PMBMP pmbmp, long xp, long yp, PGL ppal);
     void DrawMbmp(PMBMP pmbmp, RC *prc);
 
     // transitions
@@ -713,11 +713,12 @@ class GPT : public GPT_PAR
     static void MarkStaticMem(void);
 #endif // DEBUG
 
+    static HPALETTE CreatePal(PGL pglclr);
     static void SetActiveColors(PGL pglclr, ulong grfpal);
     static PGL PglclrGetPalette(void);
     static void Flush(void);
 
-    static PGPT PgptNewOffscreen(RC *prc, long cbitPixel);
+    static PGPT PgptNewOffscreen(RC *prc, long cbitPixel, PALETTEENTRY *pColors = pvNil);
     static PGPT PgptNewPic(RC *prc);
     PPIC PpicRelease(void);
     void SetOffscreenColors(PGL pglclr = pvNil);
@@ -738,7 +739,7 @@ class GPT : public GPT_PAR
 
     void CopyPixels(PGPT pgptSrc, RCS *prcsSrc, RCS *prcsDst, GDD *pgdd);
     void DrawPic(PPIC ppic, RCS *prcs, GDD *pgdd);
-    void DrawMbmp(PMBMP pmbmp, RCS *prcs, GDD *pgdd);
+    void DrawMbmp(PMBMP pmbmp, RCS *prcs, GDD *pgdd, PGL ppal);
 
     void Lock(void);
     void Unlock(void);

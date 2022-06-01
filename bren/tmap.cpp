@@ -44,6 +44,10 @@ PTMAP TMAP::PtmapRead(PCFL pcfl, CTG ctg, CNO cno)
     TMAPF tmapf;
     BLCK blck;
     TMAP *ptmap;
+    PGL pglclr;
+    long cbRowMultiplier = 1;
+    void *pixelsFromFile;
+    long cbTmapPixels;
 
     ptmap = NewObj TMAP;
     if (pvNil == ptmap)
@@ -56,15 +60,27 @@ PTMAP TMAP::PtmapRead(PCFL pcfl, CTG ctg, CNO cno)
 
     if (kboCur != tmapf.bo)
         SwapBytesBom(&tmapf, kbomTmapf);
+
+    if (tmapf.type == BR_PMT_INDEX_8)
+    {
+        pglclr = GPT::PglclrGetPalette(); // Current palette
+        if (pglclr->IvMac() == 0)
+        {
+            // Palette does not exist yet (loading shade table)
+            // Skip trying to convert this texture
+            ReleasePpo(&pglclr);
+        }
+    }
     Assert(kboCur == tmapf.bo, "bad TMAPF");
 
+    cbTmapPixels = LwMul(tmapf.cbRow, tmapf.dyp);
+
     ptmap->_bpmp.identifier = (char *)ptmap; // to get TMAP from a (BPMP *)
-    if (!FAllocPv((void **)&ptmap->_bpmp.pixels, LwMul(tmapf.cbRow, tmapf.dyp), fmemClear, mprNormal))
+    if (!FAllocPv((void **)&pixelsFromFile, cbTmapPixels, fmemClear, mprNormal))
     {
         goto LFail;
     }
     ptmap->_bpmp.map = pvNil;
-    ptmap->_bpmp.row_bytes = tmapf.cbRow;
     ptmap->_bpmp.type = tmapf.type;
     ptmap->_bpmp.flags = tmapf.grftmap;
     ptmap->_bpmp.base_x = tmapf.xpLeft;
@@ -74,13 +90,40 @@ PTMAP TMAP::PtmapRead(PCFL pcfl, CTG ctg, CNO cno)
     ptmap->_bpmp.origin_x = tmapf.xpOrigin;
     ptmap->_bpmp.origin_y = tmapf.ypOrigin;
 
-    if (!blck.FReadRgb(ptmap->_bpmp.pixels, LwMul(tmapf.cbRow, tmapf.dyp), size(TMAPF)))
+    if (!blck.FReadRgb(pixelsFromFile, cbTmapPixels, size(TMAPF)))
     {
         goto LFail;
     }
+
+    // If pglclr then TMAP is 8-bit (and the palette exists)
+    // Convert to 24-bit
+    if (pglclr != pvNil)
+    {
+        ptmap->_bpmp.type = BR_PMT_RGB_888;
+        ptmap->_bpmp.row_bytes = tmapf.cbRow * 3;
+        FAllocPv((void **)&ptmap->_bpmp.pixels, cbTmapPixels * 3, fmemClear, mprNormal);
+        for (long i = 0; i < cbTmapPixels; i++)
+        {
+            CLR clr = *(CLR *)(pglclr->QvGet(((byte *)pixelsFromFile)[i]));
+            ((byte *)ptmap->_bpmp.pixels)[i * 3] = clr.bBlue;
+            ((byte *)ptmap->_bpmp.pixels)[i * 3 + 1] = clr.bGreen;
+            ((byte *)ptmap->_bpmp.pixels)[i * 3 + 2] = clr.bRed;
+        }
+
+        // No longer need the pixels from file
+        FreePpv(&pixelsFromFile);
+    }
+    else
+    {
+        ptmap->_bpmp.row_bytes = tmapf.cbRow;
+        ptmap->_bpmp.pixels = pixelsFromFile;
+    }
+
     return ptmap;
 LFail:
     ReleasePpo(&ptmap);
+    ReleasePpo(&pglclr);
+    FreePpv(&pixelsFromFile);
     return pvNil;
 }
 
@@ -292,6 +335,7 @@ PTMAP TMAP::PtmapReadNative(FNI *pfni)
  */
 PTMAP TMAP::PtmapNew(byte *prgbPixels, long dxp, long dyp)
 {
+    // FIXME(frank-weindel): This only works with 8-bit TMAPs right now
     PTMAP ptmap;
 
     Assert(dxp <= ksuMax, "bitmap too wide");

@@ -1234,7 +1234,7 @@ bool GNV::_FEnsureTempGnv(PGNV *ppgnv, RC *prc)
     PGPT pgpt;
     PGNV pgnv;
 
-    if (pvNil == (pgpt = GPT::PgptNewOffscreen(prc, 8)) || pvNil == (pgnv = NewObj GNV(pgpt)))
+    if (pvNil == (pgpt = GPT::PgptNewOffscreen(prc, 24)) || pvNil == (pgnv = NewObj GNV(pgpt)))
     {
         ReleasePpo(&pgpt);
         *ppgnv = pvNil;
@@ -1978,7 +1978,7 @@ void GNV::DrawPic(PPIC ppic, RC *prc)
 /***************************************************************************
     Draw the mbmp with reference point at the given point.
 ***************************************************************************/
-void GNV::DrawMbmp(PMBMP pmbmp, long xp, long yp)
+void GNV::DrawMbmp(PMBMP pmbmp, long xp, long yp, PGL ppal)
 {
     AssertThis(0);
     AssertPo(pmbmp, 0);
@@ -1989,7 +1989,7 @@ void GNV::DrawMbmp(PMBMP pmbmp, long xp, long yp)
     rc.Offset(xp - rc.xpLeft, yp - rc.ypTop);
     if (!_FMapRcRcs(&rc, &rcs))
         return;
-    _pgpt->DrawMbmp(pmbmp, &rcs, &_gdd);
+    _pgpt->DrawMbmp(pmbmp, &rcs, &_gdd, ppal);
 }
 
 /***************************************************************************
@@ -2004,7 +2004,7 @@ void GNV::DrawMbmp(PMBMP pmbmp, RC *prc)
 
     if (!_FMapRcRcs(prc, &rcs))
         return;
-    _pgpt->DrawMbmp(pmbmp, &rcs, &_gdd);
+    _pgpt->DrawMbmp(pmbmp, &rcs, &_gdd, NULL);
 }
 
 /***************************************************************************
