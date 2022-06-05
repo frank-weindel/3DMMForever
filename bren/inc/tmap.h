@@ -95,7 +95,7 @@ class TMAP : public TMAP_PAR
     bool FWriteTmapChkFile(PFNI pfniDst, bool fCompress, PMSNK pmsnkErr = pvNil);
 
     // Creates a TMAP from the width, height, and an array of bytes
-    static PTMAP PtmapNew(byte *prgbPixels, long dxWidth, long dxHeight);
+    static PTMAP PtmapNew(byte *prgbPixels, long dxWidth, long dxHeight, long cBitPixel = 8);
 
     // Some useful file methods
     long CbOnFile(void)

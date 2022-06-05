@@ -145,6 +145,16 @@ target_sources(chelpdmp PRIVATE
 )
 target_link_libraries(chelpdmp PRIVATE kauai)
 
+# 3DMM Tools
+add_executable(mktmap EXCLUDE_FROM_ALL)
+target_sources(mktmap PRIVATE
+    "${PROJECT_SOURCE_DIR}/tools/mktmap.cpp"
+)
+target_include_directories(mktmap PRIVATE $<TARGET_PROPERTY:kauai,INCLUDE_DIRECTORIES>)
+target_include_directories(mktmap PRIVATE $<TARGET_PROPERTY:engine,INCLUDE_DIRECTORIES>)
+target_link_libraries(mktmap PRIVATE $<TARGET_NAME_IF_EXISTS:kauai>)
+target_link_libraries(mktmap PRIVATE $<TARGET_NAME_IF_EXISTS:engine>)
+
 # These are only here to ensure configure is rerun when dependencies are generated.
 # This is 
 file(GLOB building-chunk-sources CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/building/*.cht")

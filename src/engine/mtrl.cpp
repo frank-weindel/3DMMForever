@@ -128,6 +128,7 @@ bool MTRL::_FInit(PCRF pcrf, CTG ctg, CNO cno)
     KID kid;
     MTRL *pmtrlThis = this; // to get MTRL from BMTL
     PTMAP ptmap = pvNil;
+    PGL pglclr = pvNil;
 
     if (!pcfl->FFind(ctg, cno, &blck) || !blck.FUnpackData())
         return fFalse;
@@ -151,21 +152,32 @@ bool MTRL::_FInit(PCRF pcrf, CTG ctg, CNO cno)
     const int r = (rand() & 2) * 255;
     const int g = (rand() & 2) * 255;
     const int b = (rand() & 2) * 255;
-    _pbmtl->colour = mtrlf.brc; // BR_COLOUR_RGB(r, g, b);
+
+    if ((pglclr = GPT::PglclrGetPalette()) && pglclr->IvMac() == 256)
+    {
+        CLR clr = *(CLR *)pglclr->QvGet(mtrlf.bIndexBase + mtrlf.cIndexRange);
+        _pbmtl->colour = clr.bRed << 16 | clr.bGreen << 8 | clr.bBlue;
+    }
+    else
+    {
+        _pbmtl->colour = mtrlf.brc; // BR_COLOUR_RGB(r, g, b);
+    }
+
+    //_pbmtl->colour = mtrlf.brc;
     _pbmtl->ka = mtrlf.brufKa;
     _pbmtl->kd = mtrlf.brufKd;
     // Note: for socrates, mtrlf.brufKs should be zero
-    _pbmtl->ks = mtrlf.brufKs; // BR_UFRACTION(0.60);
+    _pbmtl->ks = BR_UFRACTION(0.60);
 
     _pbmtl->power = mtrlf.rPower;
     _pbmtl->index_base = mtrlf.bIndexBase;
     _pbmtl->index_range = mtrlf.cIndexRange;
-    // _pbmtl->index_base = 0;
-    // _pbmtl->index_range = 63;
+    _pbmtl->index_base = 0;
+    _pbmtl->index_range = 63;
     _pbmtl->opacity = kbOpaque; // all socrates objects are opaque
 
     // REVIEW *****: also set the BR_MATF_PRELIT flag to use prelit models
-    _pbmtl->flags = 0; // BR_MATF_LIGHT | BR_MATF_SMOOTH;
+    _pbmtl->flags = BR_MATF_LIGHT | BR_MATF_SMOOTH;
 
     // now read texture map, if any
     if (pcfl->FGetKidChidCtg(ctg, cno, 0, kctgTmap, &kid))
@@ -177,7 +189,7 @@ bool MTRL::_FInit(PCRF pcrf, CTG ctg, CNO cno)
         Assert((PTMAP)_pbmtl->colour_map->identifier == ptmap, "lost tmap!");
         AssertPo(_ptmapShadeTable, 0);
         _pbmtl->index_shade = _ptmapShadeTable->Pbpmp();
-        _pbmtl->flags |= BR_MATF_MAP_COLOUR;
+        _pbmtl->flags = BR_MATF_MAP_COLOUR;
         _pbmtl->index_base = 0;
         _pbmtl->index_range = _ptmapShadeTable->Pbpmp()->height - 1;
 

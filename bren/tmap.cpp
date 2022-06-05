@@ -44,7 +44,7 @@ PTMAP TMAP::PtmapRead(PCFL pcfl, CTG ctg, CNO cno)
     TMAPF tmapf;
     BLCK blck;
     TMAP *ptmap;
-    PGL pglclr;
+    PGL pglclr = pvNil;
     long cbRowMultiplier = 1;
     void *pixelsFromFile;
     long cbTmapPixels;
@@ -230,9 +230,80 @@ PTMAP TMAP::PtmapReadNative(FNI *pfni, PGL pglclr)
     PGL pglclrSrc;
     PGL pglCache;
 
+// New Stuff
+#pragma pack(2) // the stupid bmfh is an odd number of shorts
+    struct BMH
+    {
+        BITMAPFILEHEADER bmfh;
+        BITMAPINFOHEADER bmih;
+    };
+#pragma pack()
+    PFIL pfil;
+    RC rc;
+    long fpMac, cbBitmap, cbSrc;
+    BMH bmh;
+    bool fRet;
+    FP fpCur = 0;
+
     AssertPo(pfni, 0);
 
-    if (FReadBitmap(pfni, &prgb, &pglclrSrc, &dxp, &dyp, &fUpsideDown))
+    if (pvNil == (pfil = FIL::PfilOpen(pfni)))
+        return fFalse;
+
+    fpMac = pfil->FpMac();
+    if (size(BMH) >= fpMac || !pfil->FReadRgbSeq(&bmh, size(BMH), &fpCur))
+        goto LFail;
+
+    cbSrc = bmh.bmih.biSizeImage;
+
+    if (((long)bmh.bmfh.bfSize != fpMac) || bmh.bmfh.bfType != 'MB' || !FIn(bmh.bmfh.bfOffBits, size(BMH), fpMac) ||
+        bmh.bmfh.bfReserved1 != 0 || bmh.bmfh.bfReserved2 != 0 || bmh.bmih.biSize != size(bmh.bmih) ||
+        bmh.bmih.biPlanes != 1)
+    {
+        Warn("bad bitmap file");
+        goto LFail;
+    }
+
+    // if (bmh.bmih.biBitCount != 8)
+    // 	{
+    // 	Warn("not an 8-bit bitmap");
+    // 	goto LFail;
+    // 	}
+
+    if (bmh.bmih.biCompression != BI_RGB || cbSrc != fpMac - (long)bmh.bmfh.bfOffBits && (cbSrc != 0))
+    {
+        Warn("bad compression type or bitmap file is wrong length");
+        goto LFail;
+    }
+
+    rc.Set(0, 0, bmh.bmih.biWidth, LwAbs(bmh.bmih.biHeight));
+    cbBitmap = CbRoundToLong(rc.xpRight) * rc.ypBottom * 3;
+
+    if (rc.FEmpty())
+    {
+        Warn("Empty bitmap rectangle");
+        goto LFail;
+    }
+
+    if (!FAllocPv((void **)&prgb, cbBitmap, fmemNil, mprNormal))
+        goto LFail;
+
+    if (!pfil->FReadRgb(prgb, cbBitmap, bmh.bmfh.bfOffBits))
+    {
+        FreePpv((void **)&prgb);
+    }
+
+    dxp = bmh.bmih.biWidth;
+    dyp = LwAbs(bmh.bmih.biHeight);
+    fUpsideDown = bmh.bmih.biHeight < 0;
+
+    if (true) // !!! 24-bit code
+    {
+        Assert(!fUpsideDown, 0);
+        AssertPo(pglclrSrc, 0);
+        ptmap = TMAP::PtmapNew(prgb, dxp, dyp, 24);
+    }
+    else if (false) // !!! 8-bit code
     {
         Assert(!fUpsideDown, 0);
         AssertPo(pglclrSrc, 0);
@@ -309,7 +380,8 @@ PTMAP TMAP::PtmapReadNative(FNI *pfni, PGL pglclr)
 
         ptmap = TMAP::PtmapNew(prgb, dxp, dyp);
     }
-
+LFail:
+    ReleasePpo(&pfil);
     return ptmap;
 }
 #endif // WIN
@@ -333,13 +405,13 @@ PTMAP TMAP::PtmapReadNative(FNI *pfni)
  *	output:
  *			returns the pointer to the new TMAP
  */
-PTMAP TMAP::PtmapNew(byte *prgbPixels, long dxp, long dyp)
+PTMAP TMAP::PtmapNew(byte *prgbPixels, long dxp, long dyp, long cBitPixel)
 {
-    // FIXME(frank-weindel): This only works with 8-bit TMAPs right now
     PTMAP ptmap;
 
     Assert(dxp <= ksuMax, "bitmap too wide");
     Assert(dyp <= ksuMax, "bitmap too high");
+    Assert(cBitPixel == 8 || cBitPixel == 24, "invalid cBitPixel");
 
     if ((ptmap = NewObj TMAP) != pvNil)
     {
@@ -347,8 +419,16 @@ PTMAP TMAP::PtmapNew(byte *prgbPixels, long dxp, long dyp)
         ptmap->_bpmp.identifier = (char *)ptmap;
         ptmap->_bpmp.pixels = prgbPixels;
         ptmap->_bpmp.map = pvNil;
-        ptmap->_bpmp.row_bytes = (br_int_16)dxp;
-        ptmap->_bpmp.type = BR_PMT_INDEX_8;
+        if (cBitPixel == 24)
+        {
+            ptmap->_bpmp.row_bytes = (br_int_16)dxp * 3;
+            ptmap->_bpmp.type = BR_PMT_RGB_888;
+        }
+        else
+        {
+            ptmap->_bpmp.row_bytes = (br_int_16)dxp;
+            ptmap->_bpmp.type = BR_PMT_INDEX_8;
+        }
         ptmap->_bpmp.flags = BR_PMF_LINEAR;
         ptmap->_bpmp.base_x = ptmap->_bpmp.base_y = 0;
         ptmap->_bpmp.width = (br_uint_16)dxp;
