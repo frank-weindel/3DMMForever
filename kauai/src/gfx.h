@@ -739,6 +739,7 @@ class GPT : public GPT_PAR
 
     void CopyPixels(PGPT pgptSrc, RCS *prcsSrc, RCS *prcsDst, GDD *pgdd);
     void DrawPic(PPIC ppic, RCS *prcs, GDD *pgdd);
+    void DrawMbmp(PMBMP pmbmp, RCS *prcs, GDD *pgdd);
     void DrawMbmp(PMBMP pmbmp, RCS *prcs, GDD *pgdd, PGL ppal);
 
     void Lock(void);

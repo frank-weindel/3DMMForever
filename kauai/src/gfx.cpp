@@ -2004,7 +2004,7 @@ void GNV::DrawMbmp(PMBMP pmbmp, RC *prc)
 
     if (!_FMapRcRcs(prc, &rcs))
         return;
-    _pgpt->DrawMbmp(pmbmp, &rcs, &_gdd, NULL);
+    _pgpt->DrawMbmp(pmbmp, &rcs, &_gdd);
 }
 
 /***************************************************************************

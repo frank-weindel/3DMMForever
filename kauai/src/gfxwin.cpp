@@ -1709,6 +1709,90 @@ void GPT::DrawPic(PPIC ppic, RCS *prcs, GDD *pgdd)
     Draw the masked bitmap in the given rectangle.  pgdd->prcsClip is the
     clipping rectangle.
 ***************************************************************************/
+/***************************************************************************
+    Draw the masked bitmap in the given rectangle.  pgdd->prcsClip is the
+    clipping rectangle.
+***************************************************************************/
+void GPT::DrawMbmp(PMBMP pmbmp, RCS *prcs, GDD *pgdd)
+{
+    AssertThis(0);
+    AssertPo(pmbmp, 0);
+    AssertVarMem(prcs);
+    AssertVarMem(pgdd);
+    RC rcSrc, rcDst, rcClip;
+
+    rcDst = *prcs;
+    if (pvNil != pgdd->prcsClip)
+    {
+        rcClip = *pgdd->prcsClip;
+        if (!rcClip.FIntersect(&rcDst))
+            return;
+    }
+    else
+        rcClip = rcDst;
+    pmbmp->GetRc(&rcSrc);
+    if (rcSrc.FEmpty())
+        return;
+
+    if (_cbitPixel == 8 && rcSrc.Dxp() == rcDst.Dxp() && rcSrc.Dyp() == rcDst.Dyp())
+    {
+        Assert(_hbmp != hNil, 0);
+        Assert(_rcOff.xpLeft == 0 && _rcOff.ypTop == 0, "bad _rcOff");
+        if (!rcClip.FIntersect(&_rcOff))
+            return;
+
+        if (_cactDraw >= _cactFlush)
+        {
+            Assert(_cactDraw == _cactFlush, "why is _cactDraw > _cactFlush?");
+            Flush();
+        }
+        pmbmp->Draw(_prgbPixels, _cbRow, _rcOff.Dyp(), rcDst.xpLeft - rcSrc.xpLeft, rcDst.ypTop - rcSrc.ypTop, &rcClip,
+                    _pregnClip);
+    }
+    else
+    {
+        // need to create a temporary offscreen GPT for the Mask, set the Mask
+        // area to white in this GPT, then create an offscreen GPT for the
+        // actual MBMP graphic, then blt to this GPT.
+        PT ptSrc;
+        PGPT pgpt;
+
+        SetTextColor(_hdc, kscrWhite);
+        SetBkColor(_hdc, kscrBlack);
+
+        ptSrc = rcSrc.PtTopLeft();
+        rcSrc.OffsetToOrigin();
+        if (pvNil == (pgpt = GPT::PgptNewOffscreen(&rcSrc, 1)))
+        {
+            Warn("Drawing MBMP failed");
+            return;
+        }
+        Assert(pgpt->_rcOff == rcSrc, 0);
+        pmbmp->DrawMask(pgpt->_prgbPixels, pgpt->_cbRow, rcSrc.Dyp(), -ptSrc.xp, -ptSrc.yp, &rcSrc);
+
+        // set the mask bits to white
+        _SetClip(pgdd->prcsClip);
+        StretchBlt(_hdc, rcDst.xpLeft, rcDst.ypTop, rcDst.Dxp(), rcDst.Dyp(), pgpt->_hdc, 0, 0, rcSrc.Dxp(),
+                   rcSrc.Dyp(), SRCPAINT);
+        ReleasePpo(&pgpt);
+
+        if (pvNil == (pgpt = GPT::PgptNewOffscreen(&rcSrc, 8)))
+        {
+            Warn("Drawing MBMP failed");
+            return;
+        }
+        RCS rcs = rcSrc;
+        FillRect(pgpt->_hdc, &rcs, (HBRUSH)GetStockObject(WHITE_BRUSH));
+
+        Flush();
+        pmbmp->Draw(pgpt->_prgbPixels, pgpt->_cbRow, rcSrc.Dyp(), -ptSrc.xp, -ptSrc.yp, &rcSrc);
+
+        StretchBlt(_hdc, rcDst.xpLeft, rcDst.ypTop, rcDst.Dxp(), rcDst.Dyp(), pgpt->_hdc, 0, 0, rcSrc.Dxp(),
+                   rcSrc.Dyp(), SRCAND);
+        ReleasePpo(&pgpt);
+    }
+}
+
 void GPT::DrawMbmp(PMBMP pmbmp, RCS *prcs, GDD *pgdd, PGL pglclr)
 {
     AssertThis(0);
