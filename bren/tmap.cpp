@@ -112,13 +112,13 @@ PTMAP TMAP::PtmapRead(PCFL pcfl, CTG ctg, CNO cno)
 
         // No longer need the pixels from file
         FreePpv(&pixelsFromFile);
+        ReleasePpo(&pglclr);
     }
     else
     {
         ptmap->_bpmp.row_bytes = tmapf.cbRow;
         ptmap->_bpmp.pixels = pixelsFromFile;
     }
-
     return ptmap;
 LFail:
     ReleasePpo(&ptmap);

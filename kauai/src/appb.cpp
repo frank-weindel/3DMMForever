@@ -11,6 +11,7 @@
 
 ***************************************************************************/
 #include "frame.h"
+#include "DebugWindow.h"
 ASSERTNAME
 
 PAPPB vpappb;
@@ -1761,6 +1762,9 @@ void APPB::MarkMem(void)
     CLOK::MarkAllCloks();
     if ((pgob = GOB::PgobScreen()) != pvNil)
         pgob->MarkGobTree();
+
+    // Mark DbgWin's GPT if used
+    MarkMemObj(dbgWin.pgpt);
 }
 
 /***************************************************************************

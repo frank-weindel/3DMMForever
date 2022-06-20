@@ -1,5 +1,6 @@
 #ifndef __DEBUGWINDOW_H
 #define __DEBUGWINDOW_H
+#ifdef DEBUG
 
 #include "windows.h"
 #include "gfx.h"
@@ -20,4 +21,5 @@ class DebugWindow
 
 extern DebugWindow dbgWin;
 
+#endif
 #endif

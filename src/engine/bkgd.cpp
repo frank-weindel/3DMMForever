@@ -489,8 +489,10 @@ bool BKGD::FSetCamera(PBWLD pbwld, long icam)
     }
     if (!pbwld->FSetBackground(Pcrf(), kidRGB.cki.ctg, kidRGB.cki.cno, kidZ.cki.ctg, kidZ.cki.cno, pglclrBkgd))
     {
+        ReleasePpo(&pglclrBkgd);
         return fFalse;
     }
+    ReleasePpo(&pglclrBkgd);
 
     // Get actor placements
     ReleasePpo(&_pglapos);

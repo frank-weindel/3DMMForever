@@ -1862,7 +1862,9 @@ void GPT::DrawMbmp(PMBMP pmbmp, RCS *prcs, GDD *pgdd, PGL pglclr)
         PALETTEENTRY ppal[256];
         if (pglclr != pvNil)
         {
+#ifdef DEBUG
             dbgWin.DrawPalette(pglclr, rcSrc.Dxp(), 0);
+#endif
             hpal = CreatePal(pglclr);
             GetPaletteEntries(hpal, 0, 256, ppal);
         }
@@ -1880,25 +1882,13 @@ void GPT::DrawMbmp(PMBMP pmbmp, RCS *prcs, GDD *pgdd, PGL pglclr)
         long dxp = rcDst.Dxp();
         long dyp = rcDst.Dyp();
 
-        int a = GetDeviceCaps(_hdc, TECHNOLOGY);
-        int b = GetDeviceCaps(_hdc, HORZRES);
-        int c = GetDeviceCaps(_hdc, VERTRES);
-        int d = GetDeviceCaps(_hdc, BITSPIXEL);
-        int e = GetDeviceCaps(_hdc, SIZEPALETTE);
-
-        int a2 = GetDeviceCaps(pgpt->_hdc, TECHNOLOGY);
-        int b2 = GetDeviceCaps(pgpt->_hdc, HORZRES);
-        int c2 = GetDeviceCaps(pgpt->_hdc, VERTRES);
-        int d2 = GetDeviceCaps(pgpt->_hdc, BITSPIXEL);
-        int e2 = GetDeviceCaps(pgpt->_hdc, SIZEPALETTE);
-
-        // GNV gnvDbg(dbgWin.pgpt);
-
+#ifdef DEBUG
+        GNV gnvDbg(dbgWin.pgpt);
         StretchBlt(dbgWin.hdc, rcDst.xpLeft, rcDst.ypTop, dxp, dyp, pgpt->_hdc, 0, 0, rcSrc.Dxp(), rcSrc.Dyp(),
                    SRCCOPY);
-        SaveDC(dbgWin.hdc);
-
-        RestoreDC(dbgWin.hdc, -1);
+        // SaveDC(dbgWin.hdc);
+        // RestoreDC(dbgWin.hdc, -1);
+#endif
 
         StretchBlt(_hdc, rcDst.xpLeft, rcDst.ypTop, dxp, dyp, pgpt->_hdc, 0, 0, rcSrc.Dxp(), rcSrc.Dyp(), SRCCOPY);
         if (hpal != hNil)

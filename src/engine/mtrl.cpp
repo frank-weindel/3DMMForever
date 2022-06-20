@@ -212,6 +212,7 @@ bool MTRL::_FInit(PCRF pcrf, CTG ctg, CNO cno)
     }
     BrMaterialAdd(_pbmtl);
     AssertThis(0);
+    ReleasePpo(&pglclr);
     return fTrue;
 LFail:
     /* REVIEW ***** (peted): Only the code that I added uses this LFail
@@ -220,6 +221,7 @@ LFail:
         the caller releases this instance, the TMAP and BMTL are freed anyway,
         but I don't think that it's good to count on that */
     ReleasePpo(&ptmap);
+    ReleasePpo(&pglclr);
     _pbmtl->colour_map = pvNil;
     BrMaterialFree(_pbmtl);
     _pbmtl = pvNil;

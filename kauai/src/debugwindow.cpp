@@ -1,6 +1,8 @@
 #include "frame.h"
 #include "DebugWindow.h"
 
+#ifdef DEBUG
+
 // Static
 LRESULT CALLBACK DebugWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -16,7 +18,7 @@ DebugWindow::DebugWindow()
 bool DebugWindow::Init()
 {
     const char CLASS_NAME[] = "Sample Window Class";
-
+    int i = 2;
     WNDCLASS wc = {};
 
     wc.lpfnWndProc = DebugWindow::WindowProc;
@@ -70,3 +72,4 @@ void DebugWindow::DrawPalette(PGL pglclr, long x, long y)
 }
 
 DebugWindow dbgWin;
+#endif DEBUG

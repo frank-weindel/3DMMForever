@@ -1476,7 +1476,7 @@ bool APP::_FDisplayHomeLogo(void)
     pglclr = GL::PglRead(&blck, &bo, &osk);
     if (pvNil == pglclr)
         return fFalse;
-    // NOTE(frank-weindel)> Don't seem to need this?
+    // NOTE(frank-weindel): Don't seem to need this?
     // GPT::SetActiveColors(pglclr, fpalIdentity);
 
     if (!_pcfl->FFind(kctgMbmp, kcnoMbmpHomeLogo, &blck))
@@ -4579,6 +4579,7 @@ void APP::MarkMem(void)
     MarkMemObj(_pglicrfBuilding);
     MarkMemObj(_pglicrfStudio);
     MarkMemObj(_pcex);
+    MarkMemObj(_pglclr);
 }
 #endif // DEBUG
 
@@ -4710,5 +4711,6 @@ void KWA::MarkMem(void)
     AssertThis(0);
     KWA_PAR::MarkMem();
     MarkMemObj(_pmbmp);
+    MarkMemObj(_pglclr);
 }
 #endif // DEBUG

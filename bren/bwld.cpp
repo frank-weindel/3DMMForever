@@ -202,6 +202,7 @@ BWLD::~BWLD(void)
     ReleasePpo(&_pregnDirtyWorking);
     ReleasePpo(&_pregnDirtyScreen);
     ReleasePpo(&_pcrf);
+    ReleasePpo(&_ppal);
 }
 
 /***************************************************************************
@@ -398,10 +399,11 @@ bool BWLD::FSetBackground(PCRF pcrf, CTG ctgRGB, CNO cnoRGB, CTG ctgZ, CNO cnoZ,
     else // not in half mode
     {
         GNV gnv(_pgptBackground);
-        // !!!Background
-        // GNV gnvDbg(dbgWin.pgpt);
-        // gnvDbg.DrawMbmp(pmbmpNew, 0, 0);
-        gnv.DrawMbmp(pmbmpNew, 0, 0, ppal); // !!!LOADS THE BACKROUND
+#ifdef DEBUG
+        GNV gnvDbg(dbgWin.pgpt);
+        gnvDbg.DrawMbmp(pmbmpNew, 0, 0, ppal);
+#endif
+        gnv.DrawMbmp(pmbmpNew, 0, 0, ppal);
         ReleasePpo(&pmbmpNew);
 
         ReleasePpo(&_pzbmpBackground);
@@ -417,11 +419,13 @@ bool BWLD::FSetBackground(PCRF pcrf, CTG ctgRGB, CNO cnoRGB, CTG ctgZ, CNO cnoZ,
     pcrf->AddRef();
     ReleasePpo(&_pcrf);
     _pcrf = pcrf;
+    ppal->AddRef();
+    ReleasePpo(&_ppal);
+    _ppal = ppal;
     _ctgRGB = ctgRGB;
     _cnoRGB = cnoRGB;
     _ctgZ = ctgZ;
     _cnoZ = cnoZ;
-    _ppal = ppal;
 
     return fTrue;
 }
@@ -793,6 +797,7 @@ void BWLD::MarkMem(void)
     MarkMemObj(_pregnDirtyScreen);
     MarkMemObj(_pcrf);
     MarkMemObj(_pgptStretch);
+    MarkMemObj(_ppal);
 }
 
 /******************************************************************************
