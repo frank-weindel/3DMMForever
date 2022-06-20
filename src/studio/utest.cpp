@@ -1459,8 +1459,7 @@ LFail:
 /***************************************************************************
     Set the palette and bring up the Microsoft Home Logo
 ***************************************************************************/
-bool APP::_FDisplayHomeLogo(void)
-{
+bool APP::_FDisplayHomeLogo(void) {
     AssertBaseThis(0);
     AssertPo(_pcfl, 0);
 
