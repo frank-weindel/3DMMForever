@@ -248,7 +248,7 @@ PTMAP TMAP::PtmapReadNative(FNI *pfni, PGL pglclr)
     AssertPo(pfni, 0);
 
     if (pvNil == (pfil = FIL::PfilOpen(pfni)))
-        return fFalse;
+        goto LFail;
 
     fpMac = pfil->FpMac();
     if (size(BMH) >= fpMac || !pfil->FReadRgbSeq(&bmh, size(BMH), &fpCur))
