@@ -11,6 +11,7 @@
 
 ***************************************************************************/
 #include "kidframe.h"
+#include "DebugWindow.h"
 ASSERTNAME
 
 RTCLASS(GOK)
@@ -915,6 +916,12 @@ void GOK::Draw(PGNV pgnv, RC *prcClip)
         GetRc(&rc, cooLocal);
         if (rc.FIntersect(prcClip))
             _pgorp->Draw(pgnv, prcClip);
+#ifdef DEBUG
+        GNV dbgWinGnv(dbgWin.pgpt);
+        ACR acrWhite(255, 255, 255);
+        dbgWinGnv.FillRc(prcClip, acrWhite);
+        _pgorp->Draw(&dbgWinGnv, prcClip);
+#endif
     }
 }
 

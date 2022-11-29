@@ -1781,7 +1781,7 @@ DOCGPT *DOCGPT::PdocgptNew(void)
         goto LFail;
 
     pgnv->FillRc(&rc, kacrMagenta);
-    pgnv->DrawMbmp(pmbmp, 0, 0);
+    pgnv->DrawMbmp(pmbmp, 0, 0, NULL);
 
     if (pvNil != (pdocgpt = NewObj DOCGPT))
     {

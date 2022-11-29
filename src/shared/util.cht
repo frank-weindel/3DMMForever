@@ -291,16 +291,22 @@ ENDCHUNK
 	//----------------------------------------------------------
 	CHILD_SCRIPT( "Util:switch palette", kchidScript7 )
 		::fTransition = fFalse;
-		If ( (_parm[0] != GLOBAL( cnoPal)) && GLOBAL(fTrans) && (_parm[0] != cnoNil) );
-			// different palette than what we had + okay to transition
-			Transition(kgftDissolve, 0, kTransitionTime, Transparent, _parm[0]);
-			::fTransition = fTrue;
-		Else;
-			// either the same palette or not allowed to transition, so just
-			// switch the palette
-			If( _parm[0] != cnoNil );
-				SetColorTable(_parm[0]);
-			End;
+		// FIXME(frank-weindel): Disabled transitions for now
+		// They are breaking palette changes in 24-bit mode
+		// Find way to fix later !!!
+		//If ( (_parm[0] != GLOBAL( cnoPal)) && GLOBAL(fTrans) && (_parm[0] != cnoNil) );
+		//	// different palette than what we had + okay to transition
+		//	Transition(kgftDissolve, 0, kTransitionTime, Transparent, _parm[0]);
+		//	::fTransition = fTrue;
+		//Else;
+		//	// either the same palette or not allowed to transition, so just
+		//	// switch the palette
+		//	If( _parm[0] != cnoNil );
+		//		SetColorTable(_parm[0]);
+		//	End;
+		//End;
+		If( _parm[0] != cnoNil );
+			SetColorTable(_parm[0]);
 		End;
 		SETGLOBAL( cnoPal, _parm[0] );	
 		SETGLOBAL(fTrans, fTrue);       // Reset default state of fTrans.

@@ -26,6 +26,7 @@ class KWA : public KWA_PAR
 
   protected:
     PMBMP _pmbmp; // MBMP to draw in KWA (may be pvNil)
+    PGL _pglclr;  // Main Palette
     bool _fAskForCD;
 
   public:
@@ -38,6 +39,7 @@ class KWA : public KWA_PAR
     virtual bool FFindFile(PSTN pstnSrc, PFNI pfni); // for finding AVIs
     virtual bool FModalTopic(PRCA prca, CNO cnoTopic, long *plwRet);
     void SetMbmp(PMBMP pmbmp);
+    void SetPalette(PGL pglclr);
     void SetCDPrompt(bool fAskForCD)
     {
         _fAskForCD = fAskForCD;

@@ -19,6 +19,7 @@
 #include "studio.h"
 #include "socres.h"
 #include "mminstal.h"
+#include "DebugWindow.h"
 
 ASSERTNAME
 
@@ -1475,8 +1476,8 @@ bool APP::_FDisplayHomeLogo(void)
     pglclr = GL::PglRead(&blck, &bo, &osk);
     if (pvNil == pglclr)
         return fFalse;
-    GPT::SetActiveColors(pglclr, fpalIdentity);
-    ReleasePpo(&pglclr);
+    // NOTE(frank-weindel): Don't seem to need this?
+    // GPT::SetActiveColors(pglclr, fpalIdentity);
 
     if (!_pcfl->FFind(kctgMbmp, kcnoMbmpHomeLogo, &blck))
         return fFalse;
@@ -1484,7 +1485,9 @@ bool APP::_FDisplayHomeLogo(void)
     if (pvNil == pmbmp)
         return fFalse;
     _pkwa->SetMbmp(pmbmp);
+    _pkwa->SetPalette(pglclr);
     ReleasePpo(&pmbmp);
+    ReleasePpo(&pglclr);
     UpdateMarked();
     return fTrue;
 }
@@ -4576,6 +4579,7 @@ void APP::MarkMem(void)
     MarkMemObj(_pglicrfBuilding);
     MarkMemObj(_pglicrfStudio);
     MarkMemObj(_pcex);
+    MarkMemObj(_pglclr);
 }
 #endif // DEBUG
 
@@ -4593,6 +4597,27 @@ void APP::MarkMem(void)
 KWA::~KWA(void)
 {
     ReleasePpo(&_pmbmp);
+    ReleasePpo(&_pglclr);
+}
+
+/***************************************************************************
+    Set the KWA's Palette (for splash screen)
+***************************************************************************/
+void KWA::SetPalette(PGL pglclr)
+{
+    // FIXME(frank-weindel): Added to fix palette on splash screen.
+    // 						 Remove the need for this!
+    AssertThis(0);
+    AssertNilOrPo(pglclr, 0);
+
+    RC rc;
+
+    if (pvNil != pglclr)
+        pglclr->AddRef();
+    ReleasePpo(&_pglclr);
+    _pglclr = pglclr;
+    GetRcVis(&rc, cooLocal);
+    vpappb->MarkRc(&rc, this);
 }
 
 /***************************************************************************
@@ -4623,7 +4648,7 @@ void KWA::Draw(PGNV pgnv, RC *prcClip)
     AssertVarMem(prcClip);
 
     if (pvNil != _pmbmp)
-        pgnv->DrawMbmp(_pmbmp, 0, 0);
+        pgnv->DrawMbmp(_pmbmp, 0, 0, _pglclr);
 }
 
 /***************************************************************************
@@ -4686,5 +4711,6 @@ void KWA::MarkMem(void)
     AssertThis(0);
     KWA_PAR::MarkMem();
     MarkMemObj(_pmbmp);
+    MarkMemObj(_pglclr);
 }
 #endif // DEBUG

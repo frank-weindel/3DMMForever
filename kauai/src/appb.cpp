@@ -11,6 +11,7 @@
 
 ***************************************************************************/
 #include "frame.h"
+#include "DebugWindow.h"
 ASSERTNAME
 
 PAPPB vpappb;
@@ -1271,7 +1272,7 @@ PGPT APPB::_PgptEnsure(RC *prc)
     {
         ReleasePpo(&_pgptOff);
         rc.Set(0, 0, LwMax(prc->Dxp(), _dxpOff), LwMax(prc->Dyp(), _dypOff));
-        _pgptOff = GPT::PgptNewOffscreen(&rc, 8);
+        _pgptOff = GPT::PgptNewOffscreen(&rc, 24);
         if (pvNil != _pgptOff)
         {
             _dxpOff = rc.Dxp();
@@ -1761,6 +1762,9 @@ void APPB::MarkMem(void)
     CLOK::MarkAllCloks();
     if ((pgob = GOB::PgobScreen()) != pvNil)
         pgob->MarkGobTree();
+
+    // Mark DbgWin's GPT if used
+    MarkMemObj(dbgWin.pgpt);
 }
 
 /***************************************************************************

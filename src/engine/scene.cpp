@@ -4683,7 +4683,7 @@ void SCEN::_UpdateThumbnail(void)
     }
 
     rc.Set(0, 0, Pmvie()->Pmcc()->Dxp(), Pmvie()->Pmcc()->Dyp());
-    pgpt = GPT::PgptNewOffscreen(&rc, 8);
+    pgpt = GPT::PgptNewOffscreen(&rc, 24);
 
     if (pgpt == pvNil)
     {
@@ -4693,7 +4693,7 @@ void SCEN::_UpdateThumbnail(void)
     AssertPo(pgpt, 0);
 
     rcThumb.Set(0, 0, kdxpThumbnail, kdypThumbnail);
-    pgptThumb = GPT::PgptNewOffscreen(&rcThumb, 8);
+    pgptThumb = GPT::PgptNewOffscreen(&rcThumb, 24);
 
     if (pgptThumb == pvNil)
     {

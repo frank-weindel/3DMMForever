@@ -429,6 +429,13 @@ bool BKGD::FSetCamera(PBWLD pbwld, long icam)
     CAM cam;
     PCFL pcfl = Pcrf()->Pcfl();
     BREUL breul;
+    PGL pglclrBkgd = pvNil;
+    long iclrMin;
+
+    if (!this->FGetPalette(&pglclrBkgd, &iclrMin))
+    {
+        return fFalse;
+    }
 
     TurnOnLights(pbwld);
 
@@ -480,10 +487,12 @@ bool BKGD::FSetCamera(PBWLD pbwld, long icam)
     {
         return fFalse;
     }
-    if (!pbwld->FSetBackground(Pcrf(), kidRGB.cki.ctg, kidRGB.cki.cno, kidZ.cki.ctg, kidZ.cki.cno))
+    if (!pbwld->FSetBackground(Pcrf(), kidRGB.cki.ctg, kidRGB.cki.cno, kidZ.cki.ctg, kidZ.cki.cno, pglclrBkgd))
     {
+        ReleasePpo(&pglclrBkgd);
         return fFalse;
     }
+    ReleasePpo(&pglclrBkgd);
 
     // Get actor placements
     ReleasePpo(&_pglapos);

@@ -22,7 +22,7 @@ find_package(AudioMan)
 find_package(BRender REQUIRED)
 
 # Options
-option(BUILD_PACKAGES "Build packages for 3DMM" ON)
+option(BUILD_PACKAGES "Build packages for 3DMM" OFF)
 
 cmake_dependent_option(3DMM_PACKAGE_WIX "Generate an MSI via WiX" ON "BUILD_PACKAGES AND DEFINED ENV{WIX}" OFF)
 cmake_dependent_option(3DMM_PACKAGE_ZIP "Generate a portable ZIP" ON "BUILD_PACKAGES" OFF)
@@ -145,6 +145,16 @@ target_sources(chelpdmp PRIVATE
 )
 target_link_libraries(chelpdmp PRIVATE kauai)
 
+# 3DMM Tools
+add_executable(mktmap EXCLUDE_FROM_ALL)
+target_sources(mktmap PRIVATE
+    "${PROJECT_SOURCE_DIR}/tools/mktmap.cpp"
+)
+target_include_directories(mktmap PRIVATE $<TARGET_PROPERTY:kauai,INCLUDE_DIRECTORIES>)
+target_include_directories(mktmap PRIVATE $<TARGET_PROPERTY:engine,INCLUDE_DIRECTORIES>)
+target_link_libraries(mktmap PRIVATE $<TARGET_NAME_IF_EXISTS:kauai>)
+target_link_libraries(mktmap PRIVATE $<TARGET_NAME_IF_EXISTS:engine>)
+
 # These are only here to ensure configure is rerun when dependencies are generated.
 # This is 
 file(GLOB building-chunk-sources CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/building/*.cht")
@@ -192,6 +202,7 @@ target_sources(kauai
     "${PROJECT_SOURCE_DIR}/kauai/src/crf.cpp"
     "${PROJECT_SOURCE_DIR}/kauai/src/ctl.cpp"
     "${PROJECT_SOURCE_DIR}/kauai/src/cursor.cpp"
+    "${PROJECT_SOURCE_DIR}/kauai/src/debugwindow.cpp"
     "${PROJECT_SOURCE_DIR}/kauai/src/dlg.cpp"
     "${PROJECT_SOURCE_DIR}/kauai/src/docb.cpp"
     "${PROJECT_SOURCE_DIR}/kauai/src/file.cpp"

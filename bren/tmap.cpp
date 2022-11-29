@@ -44,6 +44,10 @@ PTMAP TMAP::PtmapRead(PCFL pcfl, CTG ctg, CNO cno)
     TMAPF tmapf;
     BLCK blck;
     TMAP *ptmap;
+    PGL pglclr = pvNil;
+    long cbRowMultiplier = 1;
+    void *pixelsFromFile;
+    long cbTmapPixels;
 
     ptmap = NewObj TMAP;
     if (pvNil == ptmap)
@@ -56,15 +60,27 @@ PTMAP TMAP::PtmapRead(PCFL pcfl, CTG ctg, CNO cno)
 
     if (kboCur != tmapf.bo)
         SwapBytesBom(&tmapf, kbomTmapf);
+
+    if (tmapf.type == BR_PMT_INDEX_8)
+    {
+        pglclr = GPT::PglclrGetPalette(); // Current palette
+        if (pglclr->IvMac() == 0)
+        {
+            // Palette does not exist yet (loading shade table)
+            // Skip trying to convert this texture
+            ReleasePpo(&pglclr);
+        }
+    }
     Assert(kboCur == tmapf.bo, "bad TMAPF");
 
+    cbTmapPixels = LwMul(tmapf.cbRow, tmapf.dyp);
+
     ptmap->_bpmp.identifier = (char *)ptmap; // to get TMAP from a (BPMP *)
-    if (!FAllocPv((void **)&ptmap->_bpmp.pixels, LwMul(tmapf.cbRow, tmapf.dyp), fmemClear, mprNormal))
+    if (!FAllocPv((void **)&pixelsFromFile, cbTmapPixels, fmemClear, mprNormal))
     {
         goto LFail;
     }
     ptmap->_bpmp.map = pvNil;
-    ptmap->_bpmp.row_bytes = tmapf.cbRow;
     ptmap->_bpmp.type = tmapf.type;
     ptmap->_bpmp.flags = tmapf.grftmap;
     ptmap->_bpmp.base_x = tmapf.xpLeft;
@@ -74,13 +90,40 @@ PTMAP TMAP::PtmapRead(PCFL pcfl, CTG ctg, CNO cno)
     ptmap->_bpmp.origin_x = tmapf.xpOrigin;
     ptmap->_bpmp.origin_y = tmapf.ypOrigin;
 
-    if (!blck.FReadRgb(ptmap->_bpmp.pixels, LwMul(tmapf.cbRow, tmapf.dyp), size(TMAPF)))
+    if (!blck.FReadRgb(pixelsFromFile, cbTmapPixels, size(TMAPF)))
     {
         goto LFail;
+    }
+
+    // If pglclr then TMAP is 8-bit (and the palette exists)
+    // Convert to 24-bit
+    if (pglclr != pvNil)
+    {
+        ptmap->_bpmp.type = BR_PMT_RGB_888;
+        ptmap->_bpmp.row_bytes = tmapf.cbRow * 3;
+        FAllocPv((void **)&ptmap->_bpmp.pixels, cbTmapPixels * 3, fmemClear, mprNormal);
+        for (long i = 0; i < cbTmapPixels; i++)
+        {
+            CLR clr = *(CLR *)(pglclr->QvGet(((byte *)pixelsFromFile)[i]));
+            ((byte *)ptmap->_bpmp.pixels)[i * 3] = clr.bBlue;
+            ((byte *)ptmap->_bpmp.pixels)[i * 3 + 1] = clr.bGreen;
+            ((byte *)ptmap->_bpmp.pixels)[i * 3 + 2] = clr.bRed;
+        }
+
+        // No longer need the pixels from file
+        FreePpv(&pixelsFromFile);
+        ReleasePpo(&pglclr);
+    }
+    else
+    {
+        ptmap->_bpmp.row_bytes = tmapf.cbRow;
+        ptmap->_bpmp.pixels = pixelsFromFile;
     }
     return ptmap;
 LFail:
     ReleasePpo(&ptmap);
+    ReleasePpo(&pglclr);
+    FreePpv(&pixelsFromFile);
     return pvNil;
 }
 
@@ -187,9 +230,80 @@ PTMAP TMAP::PtmapReadNative(FNI *pfni, PGL pglclr)
     PGL pglclrSrc;
     PGL pglCache;
 
+// New Stuff
+#pragma pack(2) // the stupid bmfh is an odd number of shorts
+    struct BMH
+    {
+        BITMAPFILEHEADER bmfh;
+        BITMAPINFOHEADER bmih;
+    };
+#pragma pack()
+    PFIL pfil;
+    RC rc;
+    long fpMac, cbBitmap, cbSrc;
+    BMH bmh;
+    bool fRet;
+    FP fpCur = 0;
+
     AssertPo(pfni, 0);
 
-    if (FReadBitmap(pfni, &prgb, &pglclrSrc, &dxp, &dyp, &fUpsideDown))
+    if (pvNil == (pfil = FIL::PfilOpen(pfni)))
+        goto LFail;
+
+    fpMac = pfil->FpMac();
+    if (size(BMH) >= fpMac || !pfil->FReadRgbSeq(&bmh, size(BMH), &fpCur))
+        goto LFail;
+
+    cbSrc = bmh.bmih.biSizeImage;
+
+    if (((long)bmh.bmfh.bfSize != fpMac) || bmh.bmfh.bfType != 'MB' || !FIn(bmh.bmfh.bfOffBits, size(BMH), fpMac) ||
+        bmh.bmfh.bfReserved1 != 0 || bmh.bmfh.bfReserved2 != 0 || bmh.bmih.biSize != size(bmh.bmih) ||
+        bmh.bmih.biPlanes != 1)
+    {
+        Warn("bad bitmap file");
+        goto LFail;
+    }
+
+    // if (bmh.bmih.biBitCount != 8)
+    // 	{
+    // 	Warn("not an 8-bit bitmap");
+    // 	goto LFail;
+    // 	}
+
+    if (bmh.bmih.biCompression != BI_RGB || cbSrc != fpMac - (long)bmh.bmfh.bfOffBits && (cbSrc != 0))
+    {
+        Warn("bad compression type or bitmap file is wrong length");
+        goto LFail;
+    }
+
+    rc.Set(0, 0, bmh.bmih.biWidth, LwAbs(bmh.bmih.biHeight));
+    cbBitmap = CbRoundToLong(rc.xpRight) * rc.ypBottom * 3;
+
+    if (rc.FEmpty())
+    {
+        Warn("Empty bitmap rectangle");
+        goto LFail;
+    }
+
+    if (!FAllocPv((void **)&prgb, cbBitmap, fmemNil, mprNormal))
+        goto LFail;
+
+    if (!pfil->FReadRgb(prgb, cbBitmap, bmh.bmfh.bfOffBits))
+    {
+        FreePpv((void **)&prgb);
+    }
+
+    dxp = bmh.bmih.biWidth;
+    dyp = LwAbs(bmh.bmih.biHeight);
+    fUpsideDown = bmh.bmih.biHeight < 0;
+
+    if (true) // !!! 24-bit code
+    {
+        Assert(!fUpsideDown, 0);
+        AssertPo(pglclrSrc, 0);
+        ptmap = TMAP::PtmapNew(prgb, dxp, dyp, 24);
+    }
+    else if (false) // !!! 8-bit code
     {
         Assert(!fUpsideDown, 0);
         AssertPo(pglclrSrc, 0);
@@ -266,7 +380,8 @@ PTMAP TMAP::PtmapReadNative(FNI *pfni, PGL pglclr)
 
         ptmap = TMAP::PtmapNew(prgb, dxp, dyp);
     }
-
+LFail:
+    ReleasePpo(&pfil);
     return ptmap;
 }
 #endif // WIN
@@ -290,12 +405,13 @@ PTMAP TMAP::PtmapReadNative(FNI *pfni)
  *	output:
  *			returns the pointer to the new TMAP
  */
-PTMAP TMAP::PtmapNew(byte *prgbPixels, long dxp, long dyp)
+PTMAP TMAP::PtmapNew(byte *prgbPixels, long dxp, long dyp, long cBitPixel)
 {
     PTMAP ptmap;
 
     Assert(dxp <= ksuMax, "bitmap too wide");
     Assert(dyp <= ksuMax, "bitmap too high");
+    Assert(cBitPixel == 8 || cBitPixel == 24, "invalid cBitPixel");
 
     if ((ptmap = NewObj TMAP) != pvNil)
     {
@@ -303,8 +419,16 @@ PTMAP TMAP::PtmapNew(byte *prgbPixels, long dxp, long dyp)
         ptmap->_bpmp.identifier = (char *)ptmap;
         ptmap->_bpmp.pixels = prgbPixels;
         ptmap->_bpmp.map = pvNil;
-        ptmap->_bpmp.row_bytes = (br_int_16)dxp;
-        ptmap->_bpmp.type = BR_PMT_INDEX_8;
+        if (cBitPixel == 24)
+        {
+            ptmap->_bpmp.row_bytes = (br_int_16)dxp * 3;
+            ptmap->_bpmp.type = BR_PMT_RGB_888;
+        }
+        else
+        {
+            ptmap->_bpmp.row_bytes = (br_int_16)dxp;
+            ptmap->_bpmp.type = BR_PMT_INDEX_8;
+        }
         ptmap->_bpmp.flags = BR_PMF_LINEAR;
         ptmap->_bpmp.base_x = ptmap->_bpmp.base_y = 0;
         ptmap->_bpmp.width = (br_uint_16)dxp;

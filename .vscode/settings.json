@@ -3,5 +3,11 @@
         "W95INST.C": "cpp",
         "STDFILE.C": "cpp",
         "STDMEM.C": "cpp"
-    }
+    },
+//     "cmake.debugConfig": {
+//         "args": [
+//             "C:\\3d\\Texture Fun\\74013-Bongo-Sleeve2.TMAP.bmp",
+//             "C:\\3d\\Texture Fun\\74013-Bongo-Sleeve2.TMAP24",
+//         ]
+//   },
 }
