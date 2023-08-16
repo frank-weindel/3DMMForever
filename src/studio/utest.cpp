@@ -960,6 +960,16 @@ bool APP::_FInitOS(void)
 
     _GetWindowProps(&xpWindow, &ypWindow, &dxpWindow, &dypWindow, &dwStyle);
 
+    if ((vwig.pSdlWin = SDL_CreateWindow("3D Movie Maker", 50, 50, 640, 480, SDL_WINDOW_SHOWN)) == pvNil)
+    {
+        return fFalse;
+    }
+
+    if ((vwig.pSdlRenderer = SDL_CreateRenderer(vwig.pSdlWin, -1, SDL_RENDERER_SOFTWARE)) == pvNil)
+    {
+        return fFalse;
+    }
+
     if ((vwig.hwndApp = CreateWindow(kpszAppWndCls, stnWindowTitle.Psz(), dwStyle, xpWindow, ypWindow, dxpWindow,
                                      dypWindow, hNil, hNil, vwig.hinst, pvNil)) == hNil)
     {
@@ -1852,7 +1862,7 @@ bool APP::_FAddToCrm(PGST pgstFiles, PCRM pcrm, PGL pglFiles)
             stnT.FAppendSz(PszLit(".chk")); // REVIEW *****
             Pkwa()->SetCDPrompt(fFalse);
             fFoundFile = Pkwa()->FFindFile(&stnT, &fni);
-            Pkwa()->SetCDPrompt(fAskForCDSav);
+            Pkwa()->SetCDPrompt(fTrue);
             if (fFoundFile)
             {
                 pcfl = CFL::PcflOpen(&fni, fcflNil);

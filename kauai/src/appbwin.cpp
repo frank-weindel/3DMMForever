@@ -16,6 +16,7 @@
 #include "stdio.h"
 #include "io.h"
 
+
 ASSERTNAME
 
 WIG vwig;
@@ -100,6 +101,17 @@ bool APPB::_FInitOS(void)
         wcs.lpszClassName = PszLit("MDI");
         if (!RegisterClass(&wcs))
             return fFalse;
+    }
+
+
+    if ((vwig.pSdlWin = SDL_CreateWindow("3D Movie Maker", 50, 50, 640, 480, SDL_WINDOW_SHOWN)) == pvNil)
+    {
+        return fFalse;
+    }
+
+    if ((vwig.pSdlRenderer = SDL_CreateRenderer(vwig.pSdlWin, -1, SDL_RENDERER_SOFTWARE)) == pvNil)
+    {
+        return fFalse;
     }
 
     if ((vwig.hwndApp = CreateWindow(pszAppWndCls, stnApp.Psz(), WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, CW_USEDEFAULT,

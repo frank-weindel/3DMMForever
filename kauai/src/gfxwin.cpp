@@ -1605,6 +1605,79 @@ void GPT::CopyPixels(PGPT pgptSrc, RCS *prcsSrc, RCS *prcsDst, GDD *pgdd)
 
     _SetClip(pgdd->prcsClip);
     pgptSrc->_EnsurePalette();
+
+#ifdef SDL
+    if (_hdc == vwig.hdcApp)
+    {
+        int srcWidth = prcsSrc->right - prcsSrc->left;
+        int srcHeight = prcsSrc->bottom - prcsSrc->top;
+        int srcFullWidth = pgptSrc->_rcOff.Dxp();
+        int srcFullHeight = pgptSrc->_rcOff.Dyp();
+
+        SDL_Texture* texture = SDL_CreateTexture(
+            vwig.pSdlRenderer,
+            SDL_PIXELFORMAT_RGB24,
+            SDL_TEXTUREACCESS_STREAMING,
+            srcWidth,
+            srcHeight
+        );
+
+        // lock the texture and copy the pixel data
+        byte* pixels;
+        int pitch;
+        SDL_LockTexture(texture, NULL, (void**)&pixels, &pitch);
+
+        if (pgptSrc->_cbitPixel != 8) {
+            printf("Encounted different _cbitPixel!\n");
+            return;
+        }
+
+
+        PGL pGlclr = pgptSrc->PglclrGetPalette();
+        // Look up each pixel in the palette and copy it into texture
+        printf("Copying pixels...\n");
+        printf("- Src: x(%i) y(%i) dim(%i x %i)\n", prcsSrc->left, prcsSrc->top, prcsSrc->right - prcsSrc->left, prcsSrc->bottom - prcsSrc->top);
+        printf("- Dest: x(%i) y(%i) dim(%i x %i)\n", prcsDst->left, prcsDst->top, prcsDst->right - prcsDst->left, prcsDst->bottom - prcsDst->top);
+        for (int y = prcsSrc->top; y < prcsSrc->bottom; y++) {
+            int offset = y * pgptSrc->CbRow() + prcsSrc->left;
+            int offsetEnd = offset + srcWidth;
+            int pixelsOffset = (y - prcsSrc->top) * pitch;
+            for (; offset < offsetEnd; offset++) {
+                int rgb;
+                pGlclr->Get(pgptSrc->_prgbPixels[offset], &rgb);
+
+                pixels[pixelsOffset + 0] = rgb >> 16 & 0xFF;
+                pixels[pixelsOffset + 1] = rgb >> 8 & 0xFF;
+                pixels[pixelsOffset + 2] = rgb & 0xFF;
+                pixelsOffset += 3;
+            }
+        }
+        printf("Copied.\n");
+
+        ReleasePpo(&pGlclr);
+
+        SDL_UnlockTexture(texture);
+
+        SDL_Rect srcRect;
+        srcRect.x = 0;
+        srcRect.y = 0;
+        srcRect.w = srcWidth;
+        srcRect.h = srcHeight;
+
+        SDL_Rect dstRect;
+        dstRect.x = prcsDst->left;
+        dstRect.y = prcsDst->top;
+        dstRect.w = prcsDst->right - prcsDst->left;
+        dstRect.h = prcsDst->bottom - prcsDst->top;
+
+        SDL_RenderCopy(vwig.pSdlRenderer, texture, &srcRect, &dstRect);
+        SDL_RenderPresent(vwig.pSdlRenderer);
+
+        // cleanup
+        SDL_DestroyTexture(texture);
+    }
+#endif
+
     SetStretchBltMode(_hdc, COLORONCOLOR);
     StretchBlt(_hdc, prcsDst->left, prcsDst->top, prcsDst->right - prcsDst->left, prcsDst->bottom - prcsDst->top,
                pgptSrc->_hdc, prcsSrc->left, prcsSrc->top, prcsSrc->right - prcsSrc->left,

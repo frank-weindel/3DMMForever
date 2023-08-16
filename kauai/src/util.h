@@ -60,6 +60,10 @@ typedef HCURSOR HCRS;
 
 #endif // WIN
 
+#ifdef SDL
+#include <SDL.h>
+#endif
+
 #define size(foo) ((long)sizeof(foo))
 #define offset(FOO, field) ((int)&((FOO *)0)->field)
 #define CvFromRgv(rgv) (size(rgv) / size(rgv[0]))

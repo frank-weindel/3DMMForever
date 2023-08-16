@@ -42,6 +42,12 @@ struct WIG
     HACCEL haccel;       // main accelerator table
     HWND hwndNextViewer; // next clipboard viewer
     long lwThreadMain;   // main thread
+
+#ifdef SDL
+    // SDL
+    SDL_Window *pSdlWin;
+    SDL_Renderer *pSdlRenderer;
+#endif
 };
 extern WIG vwig;
 #endif // WIN

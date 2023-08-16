@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD 14)
 
 if(MSVC)
   #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /showIncludes")
   
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive-")
   # permissive forces C++14 const char* as default for literals
@@ -20,6 +21,7 @@ include(TargetChompSources)
 
 find_package(AudioMan)
 find_package(BRender REQUIRED)
+find_package(SDL2 CONFIG REQUIRED)
 
 # Options
 option(BUILD_PACKAGES "Build packages for 3DMM" ON)
@@ -46,6 +48,8 @@ add_compile_definitions(
   $<$<PLATFORM_ID:Windows>:WIN>
   $<$<PLATFORM_ID:Windows>:IN_80386>
   $<$<CONFIG:Debug>:DEBUG>
+  SDL_DISABLE_IMMINTRIN_H
+  SDL
 )
 
 if (NOT CMAKE_SIZEOF_VOID_P EQUAL 4)
@@ -338,6 +342,26 @@ target_chomp_sources(studio
   "${PROJECT_SOURCE_DIR}/src/shared/sharecd.cht")
 
 target_link_libraries(studio PRIVATE engine)
+target_link_libraries(engine
+  PRIVATE
+  $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+  $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+)
+target_link_libraries(brender
+  PRIVATE
+  $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+  $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+)
+target_link_libraries(studio
+  PRIVATE
+  $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+  $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+)
+target_link_libraries(kauai
+  PRIVATE
+  $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+  $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+)
 set_property(TARGET studio PROPERTY OUTPUT_NAME 3dmovie)
 target_link_options(studio BEFORE PRIVATE $<$<LINK_LANG_AND_ID:CXX,MSVC>:/MANIFESTUAC:NO>)
 target_link_options(studio
